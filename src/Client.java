@@ -12,7 +12,7 @@ import java.io.*;
 public class Client {
 	public static void main(String [] args)
 	   {
-	      String serverName = "106.69.248.238";
+	      String serverName = "127.0.0.1";
 	      int port = 2323;
 	      try
 	      {
@@ -25,7 +25,7 @@ public class Client {
 	         
 	         OutputStream outToServer = client.getOutputStream();
 	         DataOutputStream out = new DataOutputStream(outToServer);
-	         out.writeUTF("Hello from "
+	         out.writeUTF("Hello from haha "
 	                      + client.getLocalSocketAddress());
 	         
 	         InputStream inFromServer = client.getInputStream();

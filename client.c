@@ -8,7 +8,7 @@
 #include <sys/socket.h>
  
 #define MAXRCVLEN 500
-#define ADDR "0.0.0.0"
+#define ADDR "127.0.0.1"
 
  
 int main(int argc, char *argv[])
