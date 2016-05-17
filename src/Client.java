@@ -10,67 +10,39 @@ import java.io.*;
 
 
 public class Client {
-	 public static void main(String[] args) throws Exception {
-			try {
-			    SSLSocketFactory factory =
-				(SSLSocketFactory)SSLSocketFactory.getDefault();
-			    SSLSocket socket =
-				(SSLSocket)factory.createSocket("www.verisign.com", 443);
+	public static void main(String [] args) throws UnknownHostException
+	   {
+		byte[] ipAddress = new byte[4];
+		
+		ipAddress[0]= Byte.parseByte("10000010",2);
+		ipAddress[1]= Byte.parseByte("01011111",2);
+		ipAddress[2]= Byte.parseByte("11111100",2);
+		ipAddress[3]= Byte.parseByte("01110001",2);
 
-			    /*
-			     * send http request
-			     *
-			     * Before any application data is sent or received, the
-			     * SSL socket will do SSL handshaking first to set up
-			     * the security attributes.
-			     *
-			     * SSL handshaking can be initiated by either flushing data
-			     * down the pipe, or by starting the handshaking by hand.
-			     *
-			     * Handshaking is started manually in this example because
-			     * PrintWriter catches all IOExceptions (including
-			     * SSLExceptions), sets an internal error flag, and then
-			     * returns without rethrowing the exception.
-			     *
-			     * Unfortunately, this means any error messages are lost,
-			     * which caused lots of confusion for others using this
-			     * code.  The only way to tell there was an error is to call
-			     * PrintWriter.checkError().
-			     */
-			    socket.startHandshake();
-
-			    PrintWriter out = new PrintWriter(
-						  new BufferedWriter(
-						  new OutputStreamWriter(
-		     				  socket.getOutputStream())));
-
-			    out.println("GET / HTTP/1.0");
-			    out.println();
-			    out.flush();
-
-			    /*
-			     * Make sure there were no surprises
-			     */
-			    if (out.checkError())
-				System.out.println(
-				    "SSLSocketClient:  java.io.PrintWriter error");
-
-			    /* read response */
-			    BufferedReader in = new BufferedReader(
-						    new InputStreamReader(
-						    socket.getInputStream()));
-
-			    String inputLine;
-			    while ((inputLine = in.readLine()) != null)
-				System.out.println(inputLine);
-
-			    in.close();
-			    out.close();
-			    socket.close();
-
-			} catch (Exception e) {
-			    e.printStackTrace();
-			}
-		    }
-
+		
+		InetAddress serverName = InetAddress.getByAddress(ipAddress);
+	      int port = 2323;
+	      try
+	      {
+	         System.out.println("Connecting to " + serverName +
+			 " on port " + port);
+	         
+	         Socket client = new Socket(serverName, port);
+	         System.out.println("Just connected to " 
+			 + client.getRemoteSocketAddress());
+	         
+	         OutputStream outToServer = client.getOutputStream();
+	         DataOutputStream out = new DataOutputStream(outToServer);
+	         out.writeUTF("Hello from "
+	                      + client.getLocalSocketAddress());
+	         
+	         InputStream inFromServer = client.getInputStream();
+	         DataInputStream in = new DataInputStream(inFromServer);
+	         System.out.println("Server says " + in.readUTF());
+	         client.close();
+	      }catch(IOException e)
+	      {
+	         e.printStackTrace();
+	      }
+	   }
 }
