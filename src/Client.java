@@ -10,17 +10,9 @@ import java.io.*;
 
 
 public class Client {
-	public static void main(String [] args) throws UnknownHostException
+	public static void main(String [] args)
 	   {
-		byte[] ipAddress = new byte[4];
-		
-		ipAddress[0]= Byte.parseByte("10000010",2);
-		ipAddress[1]= Byte.parseByte("01011111",2);
-		ipAddress[2]= Byte.parseByte("11111100",2);
-		ipAddress[3]= Byte.parseByte("01110001",2);
-
-		
-		InetAddress serverName = InetAddress.getByAddress(ipAddress);
+	      String serverName = "130.95.252.113";
 	      int port = 2323;
 	      try
 	      {

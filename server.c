@@ -7,7 +7,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
  
-#define PORTNUM 2300
+#define PORTNUM 2323
  
 int main(int argc, char *argv[])
 {
@@ -21,8 +21,8 @@ char ip4[INET_ADDRSTRLEN];
 
     memset(&serv, 0, sizeof(serv));           /* zero the struct before filling the fields */
     serv.sin_family = AF_INET;                /* set the type of connection to TCP/IP */
-    serv.sin_addr.s_addr = inet_addr("130.95.252.113"); /* set our address to any interface */
-    serv.sin_port = 2323;           /* set the server port number */
+    serv.sin_addr.s_addr = inet_addr("130.95.254.204"); /* set our address to any interface */
+    serv.sin_port = htons(PORTNUM);           /* set the server port number */
 
 
 inet_ntop(AF_INET, &(serv.sin_addr),ip4,INET_ADDRSTRLEN);
