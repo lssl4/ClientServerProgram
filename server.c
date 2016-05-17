@@ -11,7 +11,7 @@
  
 int main(int argc, char *argv[])
 {
-    char* msg = "Hello World !\n";
+    char* msg = "Hello World haha!\n";
   
     struct sockaddr_in dest; /* socket info about the machine connecting to us */
     struct sockaddr_in serv; /* socket info about our server */
@@ -34,8 +34,16 @@ int main(int argc, char *argv[])
   
     while(1)
     {
+
+
 		int consocket = accept(mysocket, (struct sockaddr *)&dest, &socksize);
+
+        char* msgToServ;
+        recv(consocket, msgToServ, 256,0);
+
+
         printf("Incoming connection from %s - sending welcome\n", inet_ntoa(dest.sin_addr));
+        printf("Message: %s\n", msgToServ );
         send(consocket, msg, strlen(msg), 0); 
         close(consocket);
     }

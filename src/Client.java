@@ -25,8 +25,8 @@ public class Client {
 
 			in.close();
 			out.close();
-
 			client.close();
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
