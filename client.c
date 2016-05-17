@@ -8,6 +8,7 @@
 #include <sys/socket.h>
  
 #define MAXRCVLEN 500
+#define ADDR "106.69.248.238"
 
  
 int main(int argc, char *argv[])
@@ -20,7 +21,7 @@ int main(int argc, char *argv[])
   
    memset(&dest, 0, sizeof(dest));                /* zero the struct */
    dest.sin_family = AF_INET;
-   dest.sin_addr.s_addr = inet_addr("130.95.252.113"); /* set destination IP number - localhost, 127.0.0.1*/ 
+   dest.sin_addr.s_addr = inet_addr(ADDR); /* set destination IP number - localhost, 127.0.0.1*/ 
    dest.sin_port = 2323;              /* set destination port number */
  
    connect(mysocket, (struct sockaddr *)&dest, sizeof(struct sockaddr));

@@ -8,6 +8,7 @@
 #include <sys/socket.h>
  
 #define PORTNUM 2323
+#define ADDR "106.69.248.238"
  
 int main(int argc, char *argv[])
 {
@@ -21,7 +22,7 @@ char ip4[INET_ADDRSTRLEN];
 
     memset(&serv, 0, sizeof(serv));           /* zero the struct before filling the fields */
     serv.sin_family = AF_INET;                /* set the type of connection to TCP/IP */
-    serv.sin_addr.s_addr = inet_addr("130.95.254.204"); /* set our address to any interface */
+    serv.sin_addr.s_addr = inet_addr(ADDR); /* set our address to any interface */
     serv.sin_port = htons(PORTNUM);           /* set the server port number */
 
 

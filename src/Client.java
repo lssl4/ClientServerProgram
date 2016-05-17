@@ -12,7 +12,7 @@ import java.io.*;
 public class Client {
 	public static void main(String [] args)
 	   {
-	      String serverName = "130.95.252.113";
+	      String serverName = "106.69.248.238";
 	      int port = 2323;
 	      try
 	      {
