@@ -4,7 +4,7 @@ import java.io.*;
 
 public class Client {
 	public static void main(String[] args) {
-		String serverName = "127.0.0.1";
+		String serverName = "130.95.252.73";
 		int port = 2323;
 
 		BufferedReader in;
@@ -16,14 +16,14 @@ public class Client {
 			 SSLSocketFactory factory =
 						(SSLSocketFactory)SSLSocketFactory.getDefault();
 					    SSLSocket client =
-						(SSLSocket)factory.createSocket("130.95.252.73", 2323);
+						(SSLSocket)factory.createSocket(serverName, port);
 
 			System.out.println("Connecting to " + serverName + " on port " + port);
 
 			System.out.println("Just connected to " + client.getRemoteSocketAddress());
 
 			// Get output stream
-		    client.startHandshake();
+		    //client.startHandshake();
 
 		    PrintWriter out = new PrintWriter(
 					  new BufferedWriter(
