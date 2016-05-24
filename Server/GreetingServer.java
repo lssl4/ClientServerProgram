@@ -10,8 +10,7 @@ public class GreetingServer extends Thread
    public GreetingServer(int port) throws IOException
    {
       serverSocket = new ServerSocket(port);
-      serverSocket.setSoTimeout(10000);
-   }
+        }
 
    public void run()
    {
@@ -45,7 +44,7 @@ public class GreetingServer extends Thread
    }
    public static void main(String [] args)
    {
-      int port = Integer.parseInt(args[0]);
+      int port = 2323;
       try
       {
          Thread t = new GreetingServer(port);
