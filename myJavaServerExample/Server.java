@@ -3,11 +3,12 @@ import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 import java.io.*;
-import java.util.ArrayList;
+import java.util.*;
 
 public class Server {
 
     private static ArrayList<ServerFile> serverFileSystem;
+    protected SSLSocket sslsocket;
 
     public Server() {
 
@@ -19,15 +20,15 @@ public class Server {
             SSLServerSocket sslserversocket = (SSLServerSocket) sslserversocketfactory.createServerSocket(2323);
             SSLSocket sslsocket = (SSLSocket) sslserversocket.accept();
 
-            InputStream inputstream = sslsocket.getInputStream();
+            /*InputStream inputstream = sslsocket.getInputStream();
             InputStreamReader inputstreamreader = new InputStreamReader(inputstream);
-            BufferedReader bufferedreader = new BufferedReader(inputstreamreader);
+            BufferedReader bufferedreader = new BufferedReader(inputstreamreader);*/
 
             OutputStream outputstream = sslsocket.getOutputStream();
             OutputStreamWriter outputstreamwriter = new OutputStreamWriter(outputstream);
             BufferedWriter bufferedwriter = new BufferedWriter(outputstreamwriter);
-
-            bufferedwriter.write("hahahahaha");
+ 
+           bufferedwriter.write("hahahahaha");
 
             sslsocket.close();
 
@@ -46,9 +47,15 @@ public class Server {
 
         }
 
-        public void add(String file, int size, String cert) {
-            ServerFile newFile = new ServerFile(file, size, cert);
-            serverFileSystem.add(newFile);
+            public void add(String file, int size, String cert) {
+                ServerFile newFile = new ServerFile(file, size, cert);
+                serverFileSystem.add(newFile);
+                
+                
+                //Also outputing the data
+                InputStream inputstream = sslsocket.getInputStream();
+                
+                
 
         }
 
@@ -68,16 +75,27 @@ public class Server {
 
         }
 
-        public File[] listFiles(int cir) {
+        public ArrayList<String> listFiles(int cir) {
 
-            File f = new File("Files/");
-
-            return f.listFiles();
+            ArrayList<String> list = new ArrayList<String>();
+            
+            Collections.sort(serverFileSystem);
+            
+            for( ServerFile f: serverFileSystem){
+            	
+            	if(f.certificates.size() >=cir){
+            		
+            		list.add(f.fileName);
+            		
+            	}
+            }
+            
+            return list;
         }
 
     }
 
-    public class ServerFile {
+    public class ServerFile implements Comparable{
 
         String fileName;
         int checksum;
@@ -93,6 +111,18 @@ public class Server {
             certificates.add(cert);
 
         }
+
+        
+        public int compareTo(ServerFile o) {
+            try{
+            return o.certificates.size() - this.certificates.size();
+            }catch(UnsupportedOperationException os){
+            
+            	throw new UnsupportedOperationException(os);
+            }
+        
+        }
+
         
         
         
