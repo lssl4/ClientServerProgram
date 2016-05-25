@@ -5,20 +5,11 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-
-public
-class ServerSSL {
-    public static void main(String[] args) {
+public class Server{
+    public static void main(String[] arstring) {
         try {
-
-            System.setProperty("javax.net.ssl.keyStore", "mySrvKeystore");
-            System.setProperty("javax.net.ssl.keyStorePassword", "cits3002");
-
-
-            SSLServerSocketFactory sslserversocketfactory =
-                    (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
-            SSLServerSocket sslserversocket =
-                    (SSLServerSocket) sslserversocketfactory.createServerSocket(2323);
+            SSLServerSocketFactory sslserversocketfactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
+            SSLServerSocket sslserversocket = (SSLServerSocket) sslserversocketfactory.createServerSocket(60032);
             SSLSocket sslsocket = (SSLSocket) sslserversocket.accept();
 
             InputStream inputstream = sslsocket.getInputStream();
@@ -35,3 +26,4 @@ class ServerSSL {
         }
     }
 }
+      
