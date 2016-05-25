@@ -121,20 +121,16 @@ public class ClassFileServer extends ClassServer {
 	    "If the fourth argument is true,it will require\n" +
 	    "client authentication as well.");
 
-	int port = DefaultServerPort;
+	int port = 2323;
 	String docroot = "";
 
-	if (args.length >= 1) {
-	    port = Integer.parseInt(args[0]);
-	}
+	
 
-	if (args.length >= 2) {
-	    docroot = args[1];
-	}
+
 	String type = "PlainSocket";
-	if (args.length >= 3) {
-	    type = args[2];
-	}
+	
+	   
+	
 	try {
 	    ServerSocketFactory ssf =
 		ClassFileServer.getServerSocketFactory(type);
@@ -158,13 +154,13 @@ public class ClassFileServer extends ClassServer {
 		SSLContext ctx;
 		KeyManagerFactory kmf;
 		KeyStore ks;
-		char[] passphrase = "passphrase".toCharArray();
+		char[] passphrase = "cits3002".toCharArray();
 
 		ctx = SSLContext.getInstance("TLS");
 		kmf = KeyManagerFactory.getInstance("SunX509");
 		ks = KeyStore.getInstance("JKS");
 
-		ks.load(new FileInputStream("testkeys"), passphrase);
+		ks.load(new FileInputStream("keystore.jks"), passphrase);
 		kmf.init(ks, passphrase);
 		ctx.init(kmf.getKeyManagers(), null, null);
 

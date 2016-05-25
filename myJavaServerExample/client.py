@@ -2,7 +2,7 @@ import socket
 import ssl
 #https://carlo-hamalainen.net/blog/2013/1/24/python-ssl-socket-echo-test-with-self-signed-certificate
 s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-sslSock = ssl.wrap_socket(s,keyfile="client.key",certfile="client.crt",ca_certs="serv.crt",cert_reqs=ssl.CERT_REQUIRED)
+sslSock = ssl.wrap_socket(s,ca_certs="self.crt",cert_reqs=ssl.CERT_REQUIRED)
 sslSock.connect(("127.0.0.1",2323))
 sslSock.send(bytes("NOOOOOOOOOOOO - Darth Vader",'utf-8'))
 sslSock.close()
