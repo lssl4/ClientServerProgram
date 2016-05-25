@@ -1,5 +1,0 @@
-Contributors
-
-Shaun
-Trae
-Alex
