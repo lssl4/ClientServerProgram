@@ -32,7 +32,7 @@ elif options.hostname is None:
 else:  
     hostInfo = options.hostname.split(':')
     s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-    sslSock = ssl.wrap_socket(s,ca_certs="serv.crt",cert_reqs=ssl.CERT_REQUIRED)
+    sslSock = ssl.wrap_socket(s,cert_reqs=ssl.CERT_NONE)
     sslSock.connect((hostInfo[0],int(hostInfo[1])))
     #sslSock.send("NOOOOOOOOOOOO - Darth Vader")
     msg = str(sslSock.read(1024))

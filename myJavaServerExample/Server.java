@@ -1,26 +1,29 @@
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 
 public class Server{
     public static void main(String[] arstring) {
         try {
             SSLServerSocketFactory sslserversocketfactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
-            SSLServerSocket sslserversocket = (SSLServerSocket) sslserversocketfactory.createServerSocket(60032);
+            SSLServerSocket sslserversocket = (SSLServerSocket) sslserversocketfactory.createServerSocket(2323);
             SSLSocket sslsocket = (SSLSocket) sslserversocket.accept();
 
             InputStream inputstream = sslsocket.getInputStream();
             InputStreamReader inputstreamreader = new InputStreamReader(inputstream);
             BufferedReader bufferedreader = new BufferedReader(inputstreamreader);
 
-            String string = null;
-            while ((string = bufferedreader.readLine()) != null) {
-                System.out.println(string);
-                System.out.flush();
-            }
+            
+            OutputStream outputstream = sslsocket.getOutputStream();
+            OutputStreamWriter outputstreamwriter = new OutputStreamWriter(outputstream);
+            BufferedWriter bufferedwriter = new BufferedWriter(outputstreamwriter);
+            
+            bufferedwriter.write("hahahahah");
+            
+            sslsocket.close();
+            
+            
         } catch (Exception exception) {
             exception.printStackTrace();
         }
