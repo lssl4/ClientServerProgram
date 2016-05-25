@@ -66,12 +66,12 @@ void configure_context(SSL_CTX *ctx)
     SSL_CTX_set_ecdh_auto(ctx, 1);
 
     /* Set the key and cert */
-    if (SSL_CTX_use_certificate_file(ctx, "serv.pem", SSL_FILETYPE_PEM) < 0) {
+    if (SSL_CTX_use_certificate_file(ctx, "serv.crt", SSL_FILETYPE_PEM) < 0) {
         ERR_print_errors_fp(stderr);
 	exit(EXIT_FAILURE);
     }
 
-    if (SSL_CTX_use_PrivateKey_file(ctx, "serv.pem", SSL_FILETYPE_PEM) < 0 ) {
+    if (SSL_CTX_use_PrivateKey_file(ctx, "serv.key", SSL_FILETYPE_PEM) < 0 ) {
         ERR_print_errors_fp(stderr);
 	exit(EXIT_FAILURE);
     }
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
 
     configure_context(ctx);
 
-    sock = create_socket(2323);
+    sock = create_socket(2324);
 
     /* Handle connections */
     while(1) {
