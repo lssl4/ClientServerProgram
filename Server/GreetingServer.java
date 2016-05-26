@@ -54,7 +54,7 @@ import javax.security.cert.X509Certificate;
  * server.
  */
 
-public class ClassFileServer extends ClassServer {
+public class GreetingServer extends ClassServer {
 
     private String docroot;
 

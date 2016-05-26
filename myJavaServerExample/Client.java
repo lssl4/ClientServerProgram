@@ -2,11 +2,14 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.*;
 
+
+
+//http://stilius.net/java/java_ssl.php
 public class Client {
     public static void main(String[] arstring) {
         try {
             SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-            SSLSocket sslsocket = (SSLSocket) sslsocketfactory.createSocket("localhost", 60032);
+            SSLSocket sslsocket = (SSLSocket) sslsocketfactory.createSocket("localhost", 8765);
 
             InputStream inputstream = System.in;
             InputStreamReader inputstreamreader = new InputStreamReader(inputstream);
