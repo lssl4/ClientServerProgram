@@ -4,17 +4,19 @@ import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 
 import java.io.*;
+import java.security.cert.*;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 //http://stilius.net/java/java_ssl.php
 public class Server {
 
-  private static OurFileSystem exa;
+  private static OurFileSystem filesys;
 
   public Server() {
     try {
-      exa = new OurFileSystem();
+      filesys = new OurFileSystem();
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -54,6 +56,8 @@ public class Server {
 
       // This block of code parses through the incoming command line
       // stream from the client
+      
+      
       String clientCom;
       while ((clientCom = in.readUTF()) != null) {
 
@@ -61,25 +65,49 @@ public class Server {
         String[] splitClientCom = clientCom.split(" ");
 
         switch (splitClientCom[0]) {
+        
+        //List all the files in directory
         case "-l":
 
-          exa.listFiles();
+          filesys.listFiles();
 
           break;
 
+        //Add a new file  
         case "-a":
-
+          
+          
+          filesys.add(splitClientCom[1], in);
+          
+          
           break;
-
+        
+          
+        //Upload a certificate  
         case "-u":
-
+          
+          
+          filesys.uploadCert(splitClientCom[1], in);
+          
+          
           break;
-
+          
+        case "-v":
+          
+          
+          
+          filesys.vouchFile(spiltClientCom[1], splitClientCom[2]);
+          
+          break;
+        
         default:
           break;
         }
 
       }
+      
+      //Closes data input stream
+      in.close();
 
       sslsocket.close();
 
@@ -99,9 +127,25 @@ public class Server {
 
     }
 
-    public void add(String file) {
-      ServerFile newFile = new ServerFile(file);
+    public void add(String filename, DataInputStream in) throws IOException {
+      
+      //next upcoming stream should be the data file
+      FileOutputStream output = new FileOutputStream("Files/" + filename);
+      
+      //Make a byte array to be the length of incoming data stream
+      byte[] outputFile = new byte[in.available()];
+      in.readFully(outputFile);
+      
+      output.write(outputFile);
+      
+      output.close();
+      
+      
+      //adding file into the filesystem array
+      ServerFile newFile = new ServerFile(filename, outputFile);
       serverFileSystem.add(newFile);
+      
+      
 
     }
 
@@ -122,7 +166,7 @@ public class Server {
 
       // find file in the serverFileSystem
       for (ServerFile obj : serverFileSystem) {
-        ArrayList<Certificate> listOfCerts = obj.certificates;
+        ArrayList<X509Certificate> listOfCerts = obj.certificates;
 
         if (obj.fileName.equals(name) && obj.certificates.size() >= cir) {
 
@@ -161,12 +205,19 @@ public class Server {
 
     }
 
-    public void vouchFile(String filename, String cert, String subject) {
+    public void vouchFile(String filename, String cert) {
+      
+      
+      
+      
 
       for (ServerFile f : serverFileSystem) {
         if (f.fileName.equals(filename)) {
-
-          f.certificates.add(new Certificate(cert, subject));
+          
+          //CertificateFactory 
+          
+          
+          f.certificates.add();
 
         }
 
@@ -179,15 +230,14 @@ public class Server {
   public class ServerFile implements Comparable<ServerFile> {
 
     String fileName;
-    MessageDigest checksum;
-    ArrayList<Certificate> certificates;
+    byte[] checksum;
+    ArrayList<X509Certificate> certificates;
 
-    public ServerFile(String name) {
+    public ServerFile(String name, byte[] rawFile) throws NoSuchAlgorithmException {
 
       fileName = name;
-      // checksum = sum;
-
-      certificates = new ArrayList<Certificate>();
+      checksum = MessageDigest.getInstance("MD5").digest(rawFile);
+      certificates = new ArrayList<X509Certificate>();
 
     }
 
@@ -199,16 +249,8 @@ public class Server {
 
   }
 
-  public class Certificate {
-    String filename;
-    String subjectName;
-
-    public Certificate(String f, String s) {
-      filename = f;
-      subjectName = s;
-
-    }
-
-  }
+  
+  
+  
 
 }
