@@ -56,57 +56,68 @@ public class Server {
 
       // This block of code parses through the incoming command line
       // stream from the client
-      
-      
+
       String clientCom;
       while ((clientCom = in.readUTF()) != null) {
 
         // I split the inputstream
         String[] splitClientCom = clientCom.split(" ");
 
-        switch (splitClientCom[0]) {
         
-        //List all the files in directory
+            
+            
+        switch (splitClientCom[0]) {
+
+        // List all the files in directory
         case "-l":
 
           filesys.listFiles();
 
           break;
 
-        //Add a new file  
+        // Add a new file
         case "-a":
-          
-          
+
           filesys.add(splitClientCom[1], in);
-          
-          
+
           break;
-        
-          
-        //Upload a certificate  
+
+        // Upload a certificate
         case "-u":
-          
-          
+
           filesys.uploadCert(splitClientCom[1], in);
-          
-          
+
           break;
-          
+
         case "-v":
-          
-          
-          
+
           filesys.vouchFile(splitClientCom[1], splitClientCom[2]);
+
+          break;
+          
+        case "-f":
+          
+          //if less than or equal to 2 command options, pass the filename straight through
+          if(splitClientCom.length ==2){
+            
+            filesys.fetch(splitClientCom[1], null, null);
+            
+          }else if( splitClientCom.length == 4){
+            
+            
+            filesys.fetch(clientCom.substring(clientCom.indexOf("-n"),clientCom.indexOf("-h")), certname, cir)
+            
+          }
           
           break;
-        
+
         default:
           break;
         }
 
       }
-      
-      //Closes data input stream
+
+      // Closes data input stream
       in.close();
 
       sslsocket.close();
@@ -128,29 +139,28 @@ public class Server {
     }
 
     public void add(String filename, DataInputStream in) throws IOException, NoSuchAlgorithmException {
-      
-      //next upcoming stream should be the data file
+
+      // next upcoming stream should be the data file
       FileOutputStream output = new FileOutputStream("Files/" + filename);
-      
-      //Make a byte array to be the length of incoming data stream
+
+      // Make a byte array to be the length of incoming data stream
       byte[] outputFile = new byte[in.available()];
       in.readFully(outputFile);
-      
+
       output.write(outputFile);
-      
+
       output.close();
-      
-      
-      //adding file into the filesystem array
+
+      // adding file into the filesystem array
       ServerFile newFile = new ServerFile(filename, outputFile);
       serverFileSystem.add(newFile);
-      
-      
 
     }
 
     // http://stackoverflow.com/questions/4852531/find-files-in-a-folder-using-javas
     public File fetch(String name, String certname, Integer cir) {
+      
+      //initialize the arguments if null values are given
       certname = certname != null ? certname : "";
       cir = cir != null ? cir : 0;
 
@@ -167,8 +177,16 @@ public class Server {
       // find file in the serverFileSystem to check if the conditions have been met to be fetched 
       for (ServerFile obj : serverFileSystem) {
         ArrayList<X509Certificate> listOfCerts = obj.certificates;
+        
+        //Getting all of the list of name from the ServerFile certificates 
+        ArrayList<String> listOfNames = new ArrayList<String>();
+        for(X509Certificate cert: listOfCerts){
+          
+          listOfNames.add(cert.getSubjectX500Principal().getName());
+          
+        }
 
-        if (obj.fileName.equals(name) && obj.certificates.size() >= cir && listOfCerts.contains(o) {
+        if (obj.fileName.equals(name) && obj.certificates.size() >= cir && listOfNames.contains(certname)){
           
           
           return matchingFiles[0];
@@ -207,38 +225,37 @@ public class Server {
     }
 
     public void vouchFile(String filename, final String cert) throws FileNotFoundException, CertificateException {
-      
-      
-      
-      
 
       for (ServerFile f : serverFileSystem) {
-        
-        //if the ServerFile mathces the name, add the certificate to the arraylist
+
+        // if the ServerFile mathces the name, add the certificate to
+        // the arraylist
         if (f.fileName.equals(filename)) {
-          
-          //Find the certain certificate in the certificate directories
+
+          // Find the certain certificate in the certificate
+          // directories
           File certDir = new File("Cert/");
           File[] matchingCert = certDir.listFiles(new FilenameFilter() {
-            
+
             @Override
             public boolean accept(File dir, String name) {
-              
+
               return name.equals(cert);
             }
           });
-          
-          //Once the certificate has been found, append to the ServerFile certificate arraylist
-          //https://docs.oracle.com/javase/7/docs/api/java/security/cert/X509Certificate.htmls
-          
+
+          // Once the certificate has been found, append to the
+          // ServerFile certificate arraylist
+          // https://docs.oracle.com/javase/7/docs/api/java/security/cert/X509Certificate.htmls
+
           FileInputStream inputStream = new FileInputStream(matchingCert[0]);
-          
-          
+
           CertificateFactory certFac = CertificateFactory.getInstance("X.509");
-          
-          //Once the stream has been converted to a certificate, append it to the ServerFile
+
+          // Once the stream has been converted to a certificate,
+          // append it to the ServerFile
           X509Certificate genCert = (X509Certificate) certFac.generateCertificate(inputStream);
-           f.certificates.add(genCert);
+          f.certificates.add(genCert);
 
         }
 
@@ -269,9 +286,5 @@ public class Server {
     }
 
   }
-
-  
-  
-  
 
 }
