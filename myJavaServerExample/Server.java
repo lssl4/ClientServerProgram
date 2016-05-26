@@ -14,22 +14,22 @@ public class Server {
 
 
     
-	private  OurFileSystem exa;
-	
-	
+  private  OurFileSystem exa;
+  
+  
     public Server() {
-    	 try {
-			exa = new OurFileSystem();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+       try {
+      exa = new OurFileSystem();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
     }
 
     public static void main(String[] arstring) {
         try {
             SSLServerSocketFactory sslserversocketfactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
-            SSLServerSocket sslserversocket = (SSLServerSocket) sslserversocketfactory.createServerSocket(2323);
+            SSLServerSocket sslserversocket = (SSLServerSocket) sslserversocketfactory.createServerSocket(8765);
             SSLSocket sslsocket = (SSLSocket) sslserversocket.accept();
 
             InputStream inputstream = sslsocket.getInputStream();
@@ -58,18 +58,18 @@ public class Server {
     }
 
     public class OurFileSystem {
-    	
-    	
-    	  private ArrayList<ServerFile> serverFileSystem = new ArrayList<ServerFile>();
-    	 
+      
+      
+        private ArrayList<ServerFile> serverFileSystem = new ArrayList<ServerFile>();
+       
 
         public OurFileSystem() throws IOException {
-    		
-    		serverFileSystem = new ArrayList<ServerFile>();
-    		
-    		
-    		
-    	}
+        
+        serverFileSystem = new ArrayList<ServerFile>();
+        
+        
+        
+      }
 
         public void add(String file, int sum) {
             ServerFile newFile = new ServerFile(file, sum);
@@ -106,12 +106,12 @@ public class Server {
         Collections.sort(serverFileSystem);
         
         for( ServerFile f: serverFileSystem){
-        	
-        	if(f.certificates.size() >=cir){
-        		
-        		list.add(f.fileName);
-        		
-        	}
+          
+          if(f.certificates.size() >=cir){
+            
+            list.add(f.fileName);
+            
+          }
         }
         
         return list;
@@ -123,7 +123,7 @@ public class Server {
        
         
     }
-      public class ServerFile implements Comparable{
+      public class ServerFile implements Comparable<ServerFile>{
 
           String fileName;
           int checksum;
@@ -142,13 +142,17 @@ public class Server {
 
          
 
-  		public int compareTo(Object o) {
-  			// TODO Auto-generated method stub
-  			return ((ServerFile) o).certificates.size() - this.certificates.size();
-  		}
+    
 
 
-  		
+    @Override
+    public int compareTo(ServerFile o) {
+      // TODO Auto-generated method stub
+      return o.certificates.size() - this.certificates.size();
+    }
+
+
+      
       
       }
 
