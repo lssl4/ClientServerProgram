@@ -17,6 +17,7 @@ def deal_with_client(connstream):
 
 while True:
     newsocket, fromaddr = bindsocket.accept()
+	print("attempted connect")
     connstream = ssl.wrap_socket(newsocket,
                                  server_side=True,
                                  certfile="serv.crt",
