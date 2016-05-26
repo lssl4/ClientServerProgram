@@ -150,26 +150,27 @@ public class Server {
     }
 
     // http://stackoverflow.com/questions/4852531/find-files-in-a-folder-using-javas
-    public File fetch(String name, String n, Integer cir) {
-      n = n != null ? n : "";
+    public File fetch(String name, String certname, Integer cir) {
+      certname = certname != null ? certname : "";
       cir = cir != null ? cir : 0;
 
       final String[] spilttedString = name.split(".", 2);
 
+      //Finding the appropriate file in the files directory
       File f = new File("Files/");
-
       File[] matchingFiles = f.listFiles(new FilenameFilter() {
         public boolean accept(File dir, String name) {
           return name.startsWith(spilttedString[0]) && name.endsWith(spilttedString[1]);
         }
       });
 
-      // find file in the serverFileSystem
+      // find file in the serverFileSystem to check if the conditions have been met to be fetched 
       for (ServerFile obj : serverFileSystem) {
         ArrayList<X509Certificate> listOfCerts = obj.certificates;
 
-        if (obj.fileName.equals(name) && obj.certificates.size() >= cir) {
-
+        if (obj.fileName.equals(name) && obj.certificates.size() >= cir && listOfCerts.contains(o) {
+          
+          
           return matchingFiles[0];
 
         }
