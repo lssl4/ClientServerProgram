@@ -96,7 +96,7 @@ public class Server {
           
           
           
-          filesys.vouchFile(spiltClientCom[1], splitClientCom[2]);
+          filesys.vouchFile(splitClientCom[1], splitClientCom[2]);
           
           break;
         
@@ -127,7 +127,7 @@ public class Server {
 
     }
 
-    public void add(String filename, DataInputStream in) throws IOException {
+    public void add(String filename, DataInputStream in) throws IOException, NoSuchAlgorithmException {
       
       //next upcoming stream should be the data file
       FileOutputStream output = new FileOutputStream("Files/" + filename);
@@ -205,19 +205,39 @@ public class Server {
 
     }
 
-    public void vouchFile(String filename, String cert) {
+    public void vouchFile(String filename, final String cert) throws FileNotFoundException, CertificateException {
       
       
       
       
 
       for (ServerFile f : serverFileSystem) {
+        
+        //if the ServerFile mathces the name, add the certificate to the arraylist
         if (f.fileName.equals(filename)) {
           
-          //CertificateFactory 
+          //Find the certain certificate in the certificate directories
+          File certDir = new File("Cert/");
+          File[] matchingCert = certDir.listFiles(new FilenameFilter() {
+            
+            @Override
+            public boolean accept(File dir, String name) {
+              
+              return name.equals(cert);
+            }
+          });
+          
+          //Once the certificate has been found, append to the ServerFile certificate arraylist
+          //https://docs.oracle.com/javase/7/docs/api/java/security/cert/X509Certificate.htmls
+          
+          FileInputStream inputStream = new FileInputStream(matchingCert[0]);
           
           
-          f.certificates.add();
+          CertificateFactory certFac = CertificateFactory.getInstance("X.509");
+          
+          //Once the stream has been converted to a certificate, append it to the ServerFile
+          X509Certificate genCert = (X509Certificate) certFac.generateCertificate(inputStream);
+           f.certificates.add(genCert);
 
         }
 
