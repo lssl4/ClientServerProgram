@@ -37,7 +37,7 @@ public class Server {
       BufferedReader in = new BufferedReader(new InputStreamReader(socketInputStream));
 
       // Print out the bufferedinputstream
-      System.out.println(in.readLine());
+      //System.out.println(in.readLine());
 
       // bufferedwriter.write("hahahahaha");
 
@@ -55,8 +55,8 @@ public class Server {
 
         // The circle circumference and certificate name. Commands are
         // used to assign them values.
-        int n = 0;
-        String c = "";
+        int cir = 0;
+        String certName = "";
 
         String flag = ClientCom.substring(0, 2);
 
@@ -100,18 +100,18 @@ public class Server {
 
         case "-f":
 
-          filesys.fetch(ClientCom.substring(3), in.readLine(), Integer.parseInt(in.readLine()));
+          filesys.fetch(ClientCom.substring(3), certName, cir);
 
           break;
 
         case "-n":
-          n = Integer.parseInt(ClientCom.substring(3));
+          cir = Integer.parseInt(ClientCom.substring(3));
 
           break;
 
         case "-c":
 
-          c = ClientCom.substring(3);
+          certName = ClientCom.substring(3);
 
           break;
 
