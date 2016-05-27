@@ -53,10 +53,14 @@ public class Server {
 
       while ((ClientCom = in.readLine()) != null) {
 
-        // I split the inputstream String[] splitClientCom
-        String[] splitClientCom = ClientCom.split(" ");
+        // The circle circumference and certificate name. Commands are
+        // used to assign them values.
+        int n = 0;
+        String c = "";
 
-        switch (splitClientCom[0]) {
+        String flag = ClientCom.substring(0, 2);
+
+        switch (flag) {
 
         // List all the files in directory case "-l":
         case "-l":
@@ -67,45 +71,47 @@ public class Server {
         // Add a new file case "-a":
         case "-a":
 
-          
-          //Write the file to the server directory
-          byte[] rawFile = writeFile("Files/",splitClientCom[1], Integer.parseInt(splitClientCom[2]), socketInputStream);
-          
-          
-          //passes the filename and raw file array to add method to add to the OurFileSystem object
-          filesys.add(splitClientCom[1], rawFile);
+          // Write the file to the server directory
+          byte[] rawFile = writeFile("Files/", ClientCom.substring(3), Integer.parseInt(in.readLine()),
+              socketInputStream);
+
+          // passes the filename and raw file array to add method to
+          // add to the OurFileSystem object
+          filesys.add(ClientCom.substring(3), rawFile);
 
           break;
 
         // Upload a certificate case "-u":
         case "-u":
 
-          // Make a byte array to be the length of incoming data stream to populate it with the raw data file
-          byte[] rawFileCert = writeFile("Certificates/",splitClientCom[1], Integer.parseInt(splitClientCom[2]), socketInputStream);
-          
-          filesys.uploadCert(splitClientCom[1], rawFileCert);
+          // Writing the file as a certificate and put it in the
+          // certificates folder
+          writeFile("Certificates/", ClientCom.substring(3), Integer.parseInt(in.readLine()),
+              socketInputStream);
 
           break;
 
+        // Vouch file with a certificate
         case "-v":
 
-          filesys.vouchFile(splitClientCom[1], splitClientCom[2]);
+          filesys.vouchFile(ClientCom.substring(3), in.readLine());
 
           break;
 
         case "-f":
 
-          // if less than or equal to 2 command options, pass the
-          // filename straight through
-          if (splitClientCom.length == 2) {
+          filesys.fetch(ClientCom.substring(3), in.readLine(), Integer.parseInt(in.readLine()));
 
-            filesys.fetch(splitClientCom[1], null, null);
+          break;
 
-          } else if (splitClientCom.length == 4) {
+        case "-n":
+          n = Integer.parseInt(ClientCom.substring(3));
 
-            // filesys.fetch(clientCom.substring(clientCom.indexOf("-n"),clientCom.indexOf("-c")), certname, cir);
+          break;
 
-          }
+        case "-c":
+
+          c = ClientCom.substring(3);
 
           break;
 
@@ -158,37 +164,34 @@ public class Server {
       return ServerSocketFactory.getDefault();
     }
     return null;
-  
-    
-    
+
   }
-  
-  
-  
-  //Helper function to write a file to the server and return the raw file in byte arrays
-  private static byte[] writeFile(String type, String filename, int fileSize, InputStream inStream) throws IOException{
-    
+
+  // Helper function to write a file to the server and return the raw file in
+  // byte arrays
+  private static byte[] writeFile(String type, String filename, int fileSize, InputStream inStream)
+      throws IOException {
+
     // next upcoming stream should be the data file
     // http://stackoverflow.com/questions/9520911/java-sending-and-receiving-file-byte-over-sockets
     // (27052016)
 
-    
-    
     OutputStream output = new FileOutputStream(type + filename);
 
-    // Make a byte array to be the length of incoming data stream to populate it with the raw data file
+    // Make a byte array to be the length of incoming data stream to
+    // populate it with the raw data file
     byte[] fileBytes = new byte[fileSize];
 
-    // Obtaining the number of bytes that is read and use that to write the file using the fileBytes
+    // Obtaining the number of bytes that is read and use that to write the
+    // file using the fileBytes
     int count = inStream.read(fileBytes);
-    output.write( fileBytes, 0, count );
+    output.write(fileBytes, 0, count);
 
     // Close output stream
     output.close();
-    
+
     return fileBytes;
-    
-    
+
   }
 
   public class OurFileSystem {
@@ -201,7 +204,7 @@ public class Server {
 
     }
 
-    public void add(String filename, byte[] input) throws FileNotFoundException {
+    public void add(String filename, byte[] input) throws FileNotFoundException, NoSuchAlgorithmException {
 
       // adding file into the filesystem array
       ServerFile newFile = new ServerFile(filename, input);
@@ -210,6 +213,7 @@ public class Server {
     }
 
     // http://stackoverflow.com/questions/4852531/find-files-in-a-folder-using-javas
+    // -f filename -c size -n name
     public File fetch(final String filename, String certname, Integer cir) {
 
       // initialize the arguments if null values are given
@@ -261,22 +265,19 @@ public class Server {
       return list;
     }
 
-    public void uploadCert(String name, byte[] cert) throws IOException {
-
-      
-    }
-
     public void vouchFile(String filename, final String cert) throws FileNotFoundException, CertificateException {
 
+      // For each serverfile in the serverfile system, find the file with
+      // the same name as filename
       for (ServerFile f : serverFileSystem) {
 
-        // if the ServerFile mathces the name, add the certificate to
+        // if the ServerFile matches the name, add the certificate to
         // the arraylist
         if (f.fileName.equals(filename)) {
 
           // Find the certain certificate in the certificate
           // directories
-          File certDir = new File("Cert/");
+          File certDir = new File("Certificates/");
           File[] matchingCert = certDir.listFiles(new FilenameFilter() {
 
             @Override
@@ -288,14 +289,16 @@ public class Server {
 
           // Once the certificate has been found, append to the
           // ServerFile certificate arraylist
+          // From:
           // https://docs.oracle.com/javase/7/docs/api/java/security/cert/X509Certificate.htmls
+          // (27052016)
 
           FileInputStream inputStream = new FileInputStream(matchingCert[0]);
 
           CertificateFactory certFac = CertificateFactory.getInstance("X.509");
 
           // Once the stream has been converted to a certificate,
-          // append it to the ServerFile
+          // add it to the ServerFile certificate array
           X509Certificate genCert = (X509Certificate) certFac.generateCertificate(inputStream);
           f.certificates.add(genCert);
 
