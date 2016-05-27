@@ -10,7 +10,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
-
 //http://stilius.net/java/java_ssl.php and http://docs.oracle.com/javase/1.5.0/docs/guide/security/jsse/samples/sockets/server/ClassFileServer.java
 public class Server {
 
@@ -22,7 +21,6 @@ public class Server {
     try {
       filesys = new OurFileSystem();
     } catch (IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
@@ -33,22 +31,10 @@ public class Server {
       ServerSocketFactory ssf = getServerSocketFactory(type);
       ServerSocket ss = ssf.createServerSocket(port);
       Socket sslsocket = ss.accept();
-      
-      /*
-       * InputStream inputstream = sslsocket.getInputStream();
-       * InputStreamReader inputstreamreader = new
-       * InputStreamReader(inputstream); BufferedReader bufferedreader =
-       * new BufferedReader(inputstreamreader);
-       * 
-       * OutputStream outputstream = sslsocket.getOutputStream();
-       * OutputStreamWriter outputstreamwriter = new
-       * OutputStreamWriter(outputstream); BufferedWriter bufferedwriter =
-       * new BufferedWriter(outputstreamwriter);
-       */
 
       BufferedReader in = new BufferedReader(new InputStreamReader(sslsocket.getInputStream()));
-      
-      //Print out the datainputstream
+
+      // Print out the bufferedinputstream
       System.out.println(in.readLine());
 
       // bufferedwriter.write("hahahahaha");
@@ -59,67 +45,67 @@ public class Server {
        */
 
       // Doing switch operations from incoming data stream
-
       // This block of code parses through the incoming command line
       // stream from the client
-
-      /*String clientCom;
-      while ((clientCom = in.readUTF()) != null) {
-
-        // I split the inputstream
-        String[] splitClientCom = clientCom.split(" ");
-
-        switch (splitClientCom[0]) {
-
-        // List all the files in directory
+        String ClientCom ; 
+        
+        while ((ClientCom = in.readLine()) != null) {
+        
+        // I split the inputstream String[] splitClientCom 
+        String[] splitClientCom = ClientCom.split(" ");
+        
+        switch (splitClientCom[0]){ 
+        
+        // List all the files in directory case "-l":
         case "-l":
-
-          filesys.listFiles();
-
-          break;
-
-        // Add a new file
+        filesys.listFiles();
+        
+        break;
+        
+        // Add a new file case "-a":
         case "-a":
-
+        
+          
           filesys.add(splitClientCom[1], in);
-
-          break;
-
-        // Upload a certificate
+        
+        break;
+        
+        // Upload a certificate case "-u":
         case "-u":
-
+        
+          
           filesys.uploadCert(splitClientCom[1], in);
-
-          break;
-
+        
+        break;
+        
         case "-v":
-
-          filesys.vouchFile(splitClientCom[1], splitClientCom[2]);
-
-          break;
-
+        
+        filesys.vouchFile(splitClientCom[1], splitClientCom[2]);
+        
+        break;
+        
         case "-f":
-
-          // if less than or equal to 2 command options, pass the
-          // filename straight through
-          if (splitClientCom.length == 2) {
-
-            filesys.fetch(splitClientCom[1], null, null);
-
-          } else if (splitClientCom.length == 4) {
-
-            // filesys.fetch(clientCom.substring(clientCom.indexOf("-n"),clientCom.indexOf("-c")),
-            // certname, cir);
-
-          }
-
-          break;
-
-        default:
-          break;
+        
+        // if less than or equal to 2 command options, pass the filename straight through 
+        if (splitClientCom.length == 2) {
+        
+        filesys.fetch(splitClientCom[1], null, null);
+        
+        } else if (splitClientCom.length == 4) {
+        
+         //filesys.fetch(clientCom.substring(clientCom.indexOf("-n"),clientCom.indexOf("-c")), certname, cir);
+        
+       }
+        
+        break;
+        
+        default: break; 
+        
         }
-
-      }*/
+        
+        }
+    
+       
 
       // Closes data input stream
       in.close();
