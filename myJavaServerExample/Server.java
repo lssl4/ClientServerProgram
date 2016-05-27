@@ -1,18 +1,21 @@
 
-import javax.net.ssl.SSLServerSocket;
-import javax.net.ssl.SSLServerSocketFactory;
-import javax.net.ssl.SSLSocket;
+import javax.net.ServerSocketFactory;
+import javax.net.ssl.*;
 
 import java.io.*;
+import java.net.*;
 import java.security.cert.*;
+import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
-//http://stilius.net/java/java_ssl.php
+//http://stilius.net/java/java_ssl.php and http://docs.oracle.com/javase/1.5.0/docs/guide/security/jsse/samples/sockets/server/ClassFileServer.java
 public class Server {
 
   private static OurFileSystem filesys;
+  private static String type = "TLS";
+  private static int port = 2323;
 
   public Server() {
     try {
@@ -23,13 +26,13 @@ public class Server {
     }
   }
 
-  public static void main(String[] arstring) {
+  public static void main(String[] args) {
     try {
-      SSLServerSocketFactory sslserversocketfactory = (SSLServerSocketFactory) SSLServerSocketFactory
-          .getDefault();
-      SSLServerSocket sslserversocket = (SSLServerSocket) sslserversocketfactory.createServerSocket(2323);
-      SSLSocket sslsocket = (SSLSocket) sslserversocket.accept();
 
+      ServerSocketFactory ssf = getServerSocketFactory(type);
+      ServerSocket ss = ssf.createServerSocket(port);
+      Socket sslsocket = ss.accept();
+      
       /*
        * InputStream inputstream = sslsocket.getInputStream();
        * InputStreamReader inputstreamreader = new
@@ -44,6 +47,9 @@ public class Server {
 
       InputStream inputstream = sslsocket.getInputStream();
       DataInputStream in = new DataInputStream(inputstream);
+      
+      //Print out the datainputstream
+      System.out.println(in.readUTF());
 
       // bufferedwriter.write("hahahahaha");
 
@@ -57,15 +63,12 @@ public class Server {
       // This block of code parses through the incoming command line
       // stream from the client
 
-      String clientCom;
+      /*String clientCom;
       while ((clientCom = in.readUTF()) != null) {
 
         // I split the inputstream
         String[] splitClientCom = clientCom.split(" ");
 
-        
-            
-            
         switch (splitClientCom[0]) {
 
         // List all the files in directory
@@ -94,28 +97,29 @@ public class Server {
           filesys.vouchFile(splitClientCom[1], splitClientCom[2]);
 
           break;
-          
+
         case "-f":
-          
-          //if less than or equal to 2 command options, pass the filename straight through
-          if(splitClientCom.length ==2){
-            
+
+          // if less than or equal to 2 command options, pass the
+          // filename straight through
+          if (splitClientCom.length == 2) {
+
             filesys.fetch(splitClientCom[1], null, null);
-            https://noton@bitbucket.org/AlexTraeShaun/c3002-project.git
-          }else if( splitClientCom.length == 4){
-            
-            
-            filesys.fetch(clientCom.substring(clientCom.indexOf("-n"),clientCom.indexOf("-c")), certname, cir)
-            
+
+          } else if (splitClientCom.length == 4) {
+
+            // filesys.fetch(clientCom.substring(clientCom.indexOf("-n"),clientCom.indexOf("-c")),
+            // certname, cir);
+
           }
-          
+
           break;
 
         default:
           break;
         }
 
-      }
+      }*/
 
       // Closes data input stream
       in.close();
@@ -123,9 +127,42 @@ public class Server {
       sslsocket.close();
 
     } catch (Exception exception) {
+      System.out.println("Unable to start ClassServer: " + exception.getMessage());
       exception.printStackTrace();
     }
 
+  }
+
+  // This method was obtained from:
+  // http://docs.oracle.com/javase/1.5.0/docs/guide/security/jsse/samples/sockets/server/ClassFileServer.java
+  // (27 May 2016)
+  private static ServerSocketFactory getServerSocketFactory(String type) {
+    if (type.equals("TLS")) {
+      SSLServerSocketFactory ssf = null;
+      try {
+        // set up key manager to do server authentication
+        SSLContext ctx;
+        KeyManagerFactory kmf;
+        KeyStore ks;
+        char[] passphrase = "cits3002".toCharArray();
+
+        ctx = SSLContext.getInstance("TLS");
+        kmf = KeyManagerFactory.getInstance("SunX509");
+        ks = KeyStore.getInstance("JKS");
+
+        ks.load(new FileInputStream("mykeystore.jks"), passphrase);
+        kmf.init(ks, passphrase);
+        ctx.init(kmf.getKeyManagers(), null, null);
+
+        ssf = ctx.getServerSocketFactory();
+        return ssf;
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    } else {
+      return ServerSocketFactory.getDefault();
+    }
+    return null;
   }
 
   public class OurFileSystem {
@@ -158,14 +195,13 @@ public class Server {
     }
 
     // http://stackoverflow.com/questions/4852531/find-files-in-a-folder-using-javas
-    public File fetch(String filename, String certname, Integer cir) {
-      
-      //initialize the arguments if null values are given
+    public File fetch(final String filename, String certname, Integer cir) {
+
+      // initialize the arguments if null values are given
       certname = certname != null ? certname : "";
       cir = cir != null ? cir : 0;
 
-
-      //Finding the appropriate file in the files directory
+      // Finding the appropriate file in the files directory
       File f = new File("Files/");
       File[] matchingFiles = f.listFiles(new FilenameFilter() {
         public boolean accept(File dir, String name) {
@@ -173,21 +209,22 @@ public class Server {
         }
       });
 
-      // find file in the serverFileSystem to check if the conditions have been met to be fetched 
+      // find file in the serverFileSystem to check if the conditions have
+      // been met to be fetched
       for (ServerFile obj : serverFileSystem) {
         ArrayList<X509Certificate> listOfCerts = obj.certificates;
-        
-        //Getting all of the list of name from the ServerFile certificates 
+
+        // Getting all of the list of name from the ServerFile
+        // certificates
         ArrayList<String> listOfNames = new ArrayList<String>();
-        for(X509Certificate cert: listOfCerts){
-          
+        for (X509Certificate cert : listOfCerts) {
+
           listOfNames.add(cert.getSubjectX500Principal().getName());
-          
+
         }
 
-        if (obj.fileName.equals(name) && obj.certificates.size() >= cir && listOfNames.contains(certname)){
-          
-          
+        if (obj.fileName.equals(filename) && obj.certificates.size() >= cir && listOfNames.contains(certname)) {
+
           return matchingFiles[0];
 
         }
