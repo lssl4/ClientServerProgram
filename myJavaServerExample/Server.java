@@ -32,7 +32,9 @@ public class Server {
       ServerSocket ss = ssf.createServerSocket(port);
       Socket sslsocket = ss.accept();
 
-      BufferedReader in = new BufferedReader(new InputStreamReader(sslsocket.getInputStream()));
+      InputStream socketInputStream = sslsocket.getInputStream();
+
+      BufferedReader in = new BufferedReader(new InputStreamReader(socketInputStream));
 
       // Print out the bufferedinputstream
       System.out.println(in.readLine());
@@ -47,65 +49,80 @@ public class Server {
       // Doing switch operations from incoming data stream
       // This block of code parses through the incoming command line
       // stream from the client
-        String ClientCom ; 
-        
-        while ((ClientCom = in.readLine()) != null) {
-        
-        // I split the inputstream String[] splitClientCom 
+      String ClientCom;
+
+      while ((ClientCom = in.readLine()) != null) {
+
+        // I split the inputstream String[] splitClientCom
         String[] splitClientCom = ClientCom.split(" ");
-        
-        switch (splitClientCom[0]){ 
-        
+
+        switch (splitClientCom[0]) {
+
         // List all the files in directory case "-l":
         case "-l":
-        filesys.listFiles();
-        
-        break;
-        
+          filesys.listFiles();
+
+          break;
+
         // Add a new file case "-a":
         case "-a":
-        
+
+          // next upcoming stream should be the data file
+          // http://stackoverflow.com/questions/9520911/java-sending-and-receiving-file-byte-over-sockets
+          // (27052016)
+
+          OutputStream output = new FileOutputStream("Files/" + splitClientCom[1]);
+
+          // Make a byte array to be the length of incoming data stream to populate it with the raw data file
+          byte[] fileBytes = new byte[Integer.parseInt(splitClientCom[2])];
+
+          // Obtaining the number of bytes that is read and use that to write the file using the fileBytes
+          int count = socketInputStream.read(fileBytes);
+          output.write(fileBytes, 0, count);
+
+          // Close output stream
+          output.close();
           
-          filesys.add(splitClientCom[1], in);
-        
-        break;
-        
+          //passes the filename and raw file array to add method to add to the OurFileSystem object
+          filesys.add(splitClientCom[1], fileBytes);
+
+          break;
+
         // Upload a certificate case "-u":
         case "-u":
-        
-          
+
           filesys.uploadCert(splitClientCom[1], in);
-        
-        break;
-        
+
+          break;
+
         case "-v":
-        
-        filesys.vouchFile(splitClientCom[1], splitClientCom[2]);
-        
-        break;
-        
+
+          filesys.vouchFile(splitClientCom[1], splitClientCom[2]);
+
+          break;
+
         case "-f":
-        
-        // if less than or equal to 2 command options, pass the filename straight through 
-        if (splitClientCom.length == 2) {
-        
-        filesys.fetch(splitClientCom[1], null, null);
-        
-        } else if (splitClientCom.length == 4) {
-        
-         //filesys.fetch(clientCom.substring(clientCom.indexOf("-n"),clientCom.indexOf("-c")), certname, cir);
-        
-       }
-        
-        break;
-        
-        default: break; 
-        
+
+          // if less than or equal to 2 command options, pass the
+          // filename straight through
+          if (splitClientCom.length == 2) {
+
+            filesys.fetch(splitClientCom[1], null, null);
+
+          } else if (splitClientCom.length == 4) {
+
+            // filesys.fetch(clientCom.substring(clientCom.indexOf("-n"),clientCom.indexOf("-c")), certname, cir);
+
+          }
+
+          break;
+
+        default:
+          break;
+
         }
-        
-        }
-    
-       
+
+      }
 
       // Closes data input stream
       in.close();
@@ -161,21 +178,10 @@ public class Server {
 
     }
 
-    public void add(String filename, DataInputStream in) throws IOException, NoSuchAlgorithmException {
-
-      // next upcoming stream should be the data file
-      FileOutputStream output = new FileOutputStream("Files/" + filename);
-
-      // Make a byte array to be the length of incoming data stream
-      byte[] outputFile = new byte[in.available()];
-      in.readFully(outputFile);
-
-      output.write(outputFile);
-
-      output.close();
+    public void add(String filename, byte[] input) throws FileNotFoundException {
 
       // adding file into the filesystem array
-      ServerFile newFile = new ServerFile(filename, outputFile);
+      ServerFile newFile = new ServerFile(filename, input);
       serverFileSystem.add(newFile);
 
     }
@@ -232,7 +238,7 @@ public class Server {
       return list;
     }
 
-    public void uploadCert(String name, DataInputStream cert) throws IOException {
+    public void uploadCert(String name, byte[] cert) throws IOException {
 
       FileOutputStream output = new FileOutputStream("Cert/" + name);
 
