@@ -101,11 +101,11 @@ public class Server {
           if(splitClientCom.length ==2){
             
             filesys.fetch(splitClientCom[1], null, null);
-            
+            https://noton@bitbucket.org/AlexTraeShaun/c3002-project.git
           }else if( splitClientCom.length == 4){
             
             
-            filesys.fetch(clientCom.substring(clientCom.indexOf("-n"),clientCom.indexOf("-h")), certname, cir)
+            filesys.fetch(clientCom.substring(clientCom.indexOf("-n"),clientCom.indexOf("-c")), certname, cir)
             
           }
           
@@ -158,19 +158,18 @@ public class Server {
     }
 
     // http://stackoverflow.com/questions/4852531/find-files-in-a-folder-using-javas
-    public File fetch(String name, String certname, Integer cir) {
+    public File fetch(String filename, String certname, Integer cir) {
       
       //initialize the arguments if null values are given
       certname = certname != null ? certname : "";
       cir = cir != null ? cir : 0;
 
-      final String[] spilttedString = name.split(".", 2);
 
       //Finding the appropriate file in the files directory
       File f = new File("Files/");
       File[] matchingFiles = f.listFiles(new FilenameFilter() {
         public boolean accept(File dir, String name) {
-          return name.startsWith(spilttedString[0]) && name.endsWith(spilttedString[1]);
+          return name.equals(filename);
         }
       });
 
