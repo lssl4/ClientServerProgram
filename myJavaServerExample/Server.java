@@ -67,31 +67,23 @@ public class Server {
         // Add a new file case "-a":
         case "-a":
 
-          // next upcoming stream should be the data file
-          // http://stackoverflow.com/questions/9520911/java-sending-and-receiving-file-byte-over-sockets
-          // (27052016)
-
-          OutputStream output = new FileOutputStream("Files/" + splitClientCom[1]);
-
-          // Make a byte array to be the length of incoming data stream to populate it with the raw data file
-          byte[] fileBytes = new byte[Integer.parseInt(splitClientCom[2])];
-
-          // Obtaining the number of bytes that is read and use that to write the file using the fileBytes
-          int count = socketInputStream.read(fileBytes);
-          output.write(fileBytes, 0, count);
-
-          // Close output stream
-          output.close();
+          
+          //Write the file to the server directory
+          byte[] rawFile = writeFile("Files/",splitClientCom[1], Integer.parseInt(splitClientCom[2]), socketInputStream);
+          
           
           //passes the filename and raw file array to add method to add to the OurFileSystem object
-          filesys.add(splitClientCom[1], fileBytes);
+          filesys.add(splitClientCom[1], rawFile);
 
           break;
 
         // Upload a certificate case "-u":
         case "-u":
 
-          filesys.uploadCert(splitClientCom[1], in);
+          // Make a byte array to be the length of incoming data stream to populate it with the raw data file
+          byte[] rawFileCert = writeFile("Certificates/",splitClientCom[1], Integer.parseInt(splitClientCom[2]), socketInputStream);
+          
+          filesys.uploadCert(splitClientCom[1], rawFileCert);
 
           break;
 
@@ -166,6 +158,37 @@ public class Server {
       return ServerSocketFactory.getDefault();
     }
     return null;
+  
+    
+    
+  }
+  
+  
+  
+  //Helper function to write a file to the server and return the raw file in byte arrays
+  private static byte[] writeFile(String type, String filename, int fileSize, InputStream inStream) throws IOException{
+    
+    // next upcoming stream should be the data file
+    // http://stackoverflow.com/questions/9520911/java-sending-and-receiving-file-byte-over-sockets
+    // (27052016)
+
+    
+    
+    OutputStream output = new FileOutputStream(type + filename);
+
+    // Make a byte array to be the length of incoming data stream to populate it with the raw data file
+    byte[] fileBytes = new byte[fileSize];
+
+    // Obtaining the number of bytes that is read and use that to write the file using the fileBytes
+    int count = inStream.read(fileBytes);
+    output.write( fileBytes, 0, count );
+
+    // Close output stream
+    output.close();
+    
+    return fileBytes;
+    
+    
   }
 
   public class OurFileSystem {
@@ -240,16 +263,7 @@ public class Server {
 
     public void uploadCert(String name, byte[] cert) throws IOException {
 
-      FileOutputStream output = new FileOutputStream("Cert/" + name);
-
-      byte[] outputBytes = new byte[cert.available()];
-
-      cert.readFully(outputBytes);
-
-      output.write(outputBytes);
-
-      output.close();
-
+      
     }
 
     public void vouchFile(String filename, final String cert) throws FileNotFoundException, CertificateException {
