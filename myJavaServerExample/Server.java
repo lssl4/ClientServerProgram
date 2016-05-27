@@ -10,6 +10,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
+
 //http://stilius.net/java/java_ssl.php and http://docs.oracle.com/javase/1.5.0/docs/guide/security/jsse/samples/sockets/server/ClassFileServer.java
 public class Server {
 
@@ -45,11 +46,10 @@ public class Server {
        * new BufferedWriter(outputstreamwriter);
        */
 
-      InputStream inputstream = sslsocket.getInputStream();
-      BufferredInputStream in = new BufferedInputStream(inputstream);
+      BufferedReader in = new BufferedReader(new InputStreamReader(sslsocket.getInputStream()));
       
       //Print out the datainputstream
-      System.out.println(in.read());
+      System.out.println(in.readLine());
 
       // bufferedwriter.write("hahahahaha");
 
