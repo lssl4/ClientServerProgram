@@ -32,23 +32,10 @@ elif options.hostname is None:
     exit
 else:  
     hostInfo = options.hostname.split(':')
-ctx = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH,cafile="serv.pem")
-ctx.check_hostname = False
 s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-sslSock = ctx.wrap_socket(s)
-sslSock.connect((hostInfo[0],int(hostInfo[1])))
-data = bytearray()
-data = "makeStuff.txt".encode('utf-8')
-'''
-if(options.toList):
-    data = "-l".encode('utf-8')
-if(not(options.cert is None)):
-    
-if(options.circle > 0):
-    data = ("-c " + str(circle)).encode('utf-8')
-    
-'''
-sslSock.send("hello".encode())
-#msg = str(sslSock.read(24))
-#print(msg)
+s.connect((hostInfo[0],int(hostInfo[1])))
+sen = "hello"
+s.send(sen)
+msg = str(s.read(1024))
+print(msg)
 sslSock.close()

@@ -46,10 +46,10 @@ public class Server {
        */
 
       InputStream inputstream = sslsocket.getInputStream();
-      DataInputStream in = new DataInputStream(inputstream);
+      BufferredInputStream in = new BufferedInputStream(inputstream);
       
       //Print out the datainputstream
-      System.out.println(in.readUTF());
+      System.out.println(in.read());
 
       // bufferedwriter.write("hahahahaha");
 
