@@ -248,56 +248,46 @@ while(true){
 	}
 	if(found != -1){
 		serverFileSystem.remove(found);
-	}      		
+	}
 		serverFileSystem.add(newFile);
     }
 
 
     // http://stackoverflow.com/questions/4852531/find-files-in-a-folder-using-javas
     // -f filename -c size -n name
-    public File fetch(final String filename, String certname, Integer cir) {
+    public FileInputStream fetch(final String fname, String certname, Integer cir) {
 
       // initialize the arguments if null values are given
-	//https://github.com/jgrapht/jgrapht/wiki/DirectedGraphDemo
+	     //https://github.com/jgrapht/jgrapht/wiki/DirectedGraphDemo
       certname = certname != null ? certname : "";
       cir = cir != null ? cir : 0;
 
-      // Finding the appropriate file in the files directory
-      File f = new File("Files/");
-      File[] matchingFiles = f.listFiles(new FilenameFilter() {
-        public boolean accept(File dir, String name) {
-          return name.equals(filename);
-        }
-      });
+      // Finding the appropriate file in the files directory if it exists, otherwise return null
+      for(ServerFile f: serverFileSystem){
 
-      // find file in the serverFileSystem to check if the conditions have
-      // been met to be fetched
+    	  if(f.fileName.equals(fname)){
 
+    		  //Once the file is found, apply the isValid function to determine if the file can be returned to client, if not return null
+    		  if(f.isValid()){
 
-        for (ServerFile obj : serverFileSystem) {
-        ArrayList<X509Certificate> listOfCerts = obj.certificates;
+    			  return new FileInputStream("Files/"+fname);
+    		  }
 
-        // Getting all of the list of name from the ServerFile
-        // certificates
-        ArrayList<String> listOfNames = new ArrayList<String>();
-        for (X509Certificate cert : listOfCerts) {
+    	  }else{
 
-          listOfNames.add(cert.getSubjectX500Principal().getName());
-
-        }
-
-        if (obj.fileName.equals(filename) && obj.certificates.size() >= cir && listOfNames.contains(certname)) {
-
-          return matchingFiles[0];
-
-        }
+    		  return null;
+    	  }
 
 
-        }
+      }
 
 
 
-        return null;
+
+
+
+
+
     }
 
     public String listFiles() {
