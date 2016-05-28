@@ -2,12 +2,15 @@
 import javax.net.ServerSocketFactory;
 import javax.net.ssl.*;
 
+import org.jgrapht.graph.*;
+
 import java.io.*;
 import java.net.*;
 import java.security.cert.*;
 import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.Principal;
 import java.util.*;
 
 //http://stilius.net/java/java_ssl.php and http://docs.oracle.com/javase/1.5.0/docs/guide/security/jsse/samples/sockets/server/ClassFileServer.java
@@ -77,11 +80,11 @@ public class Server {
           byte[] rawFile = writeFile("Files/", ClientCom.substring(3), Integer.parseInt(in.readLine()),
               socketInputStream);
 
-          // passes the filename and raw file array to add method to
+          // passes the afilename and raw file array to add method to
           // add to the OurFileSystem object
           filesys.add(ClientCom.substring(3), rawFile);
 
-		
+
           break;
 
         // Upload a certificate case "-u":
@@ -111,8 +114,8 @@ public class Server {
 	resp.write(String.valueOf(length)+ "\n");
 	resp.flush();
 	InputStream fin = new FileInputStream(fetched);
-        
-	
+
+
         fin.read(bytes);
 	socketOutputStream.write(bytes, 0, (int)length);
 	fin.close();
@@ -127,7 +130,7 @@ public class Server {
         case 'c':
 
           certName = ClientCom.substring(3);
-	
+
 		resp.write("Certificate circle length successful");
 		resp.flush();
           break;
@@ -245,11 +248,12 @@ public class Server {
           return name.equals(filename);
         }
       });
-	    return matchingFiles[0];
-	    /*
+
       // find file in the serverFileSystem to check if the conditions have
       // been met to be fetched
-      for (ServerFile obj : serverFileSystem) {
+
+
+        for (ServerFile obj : serverFileSystem) {
         ArrayList<X509Certificate> listOfCerts = obj.certificates;
 
         // Getting all of the list of name from the ServerFile
@@ -266,14 +270,20 @@ public class Server {
           return matchingFiles[0];
 
         }
-*/
+
+
+        }
+
+
+
+        return null;
     }
 
     public String listFiles() {
       String list = "";
 
       for (ServerFile f : serverFileSystem) {
-        list += f.fileName + "\n";
+        list += f.fileName + ": " /*+ f.maxCircle*/ + "\n";
 
       }
 
@@ -328,14 +338,19 @@ public class Server {
   public class ServerFile implements Comparable<ServerFile> {
 
     String fileName;
-    byte[] checksum;
+    byte[] hash;
     ArrayList<X509Certificate> certificates;
+    ArrayList<ArrayList<Principal>> cycleList;
+    DefaultDirectedGraph<Principal,DefaultEdge> graph;
+    //int maxCircle;
 
     public ServerFile(String name, byte[] rawFile) throws NoSuchAlgorithmException {
 
       fileName = name;
-      checksum = MessageDigest.getInstance("MD5").digest(rawFile);
+      hash = MessageDigest.getInstance("MD5").digest(rawFile);
       certificates = new ArrayList<X509Certificate>();
+
+
 
     }
 
