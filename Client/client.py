@@ -52,8 +52,11 @@ else:
     #sslSock.send("hi\n")
 
     if not(options.cert is None):
+        f = open(options.cert,'r')
+        print(str(os.path.getsize(options.cert)))
         sslSock.send("-u " + options.cert + "\n")
-        sslSock.read(msgBuffer)
+        sslSock.send(str(os.path.getsize(options.cert))+"\n")
+        sslSock.sendall(f.read())
     if not(options.valid is None):
         sslSock.send("-v " + options.valid[0] + " " + options.valid[1] + "\n")
         sslSock.read(msgBuffer)
