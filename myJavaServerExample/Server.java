@@ -2,6 +2,7 @@
 import javax.net.ServerSocketFactory;
 import javax.net.ssl.*;
 
+import org.jgrapht.alg.cycle.JohnsonSimpleCycles;
 import org.jgrapht.graph.*;
 
 import java.io.*;
@@ -254,27 +255,38 @@ while(true){
 
     // http://stackoverflow.com/questions/4852531/find-files-in-a-folder-using-javas
     // -f filename -c size -n name
-    public FileInputStream fetch(final String fname, String certname, Integer cir) {
+    public FileInputStream fetch(final String fname, String certname, Integer cir) throws FileNotFoundException {
 
       // initialize the arguments if null values are given
 	     //https://github.com/jgrapht/jgrapht/wiki/DirectedGraphDemo
       certname = certname != null ? certname : "";
       cir = cir != null ? cir : 0;
 
+      FileInputStream output = null;
+
+      //If the serverFileSystem empty, return null to indicate no file exists
+      if(serverFileSystem.isEmpty()){
+
+    	  return null;
+      }else{
+
+
       // Finding the appropriate file in the files directory if it exists, otherwise return null
       for(ServerFile f: serverFileSystem){
     	  if(f.fileName.equals(fname)){
     		  //Once the file is found, apply the isValid function to determine if the file can be returned to client, if not return null
-    		  if(f.isValid()){
+    		  if(f.isValid(cir, certname)){
 
-    			  return new FileInputStream("Files/"+fname);
+    			  output = new FileInputStream("Files/"+fname);
     		  }
 
-    	  }else{
-
-    		  return null;
     	  }
       }
+
+      }
+	return output;
+
+
     }
 
     public String listFiles() {
@@ -359,13 +371,13 @@ while(true){
 	if(cycleSize != 0 || certname != null){
 	    arraySize = cycleList.size();
 	    for(int i = 0;i<arraySize;i++){
-		innerArraySize = cyclelist.get(i).size();
-		if(innerArraylistSize >= cycleSize){
+		innerArraySize = cycleList.get(i).size();
+		if(innerArraySize >= cycleSize){
 		    if(certname==null){
 			return true;
 		    }else{
 			for(int j = 0;j<innerArraySize;j++){
-			    if(cyclelist.get(i).get(j).getName().equals(certname)){
+			    if(cycleList.get(i).get(j).getName().equals(certname)){
 				return true;
 			    }
 			}
@@ -375,11 +387,11 @@ while(true){
 	    return false;
 	}else{
 	    return true;
-	} 
-    }   
+	}
+    }
     private void constructCycles(){
 	JohnsonSimpleCycles johnsons = new JohnsonSimpleCycles(graph);
-	cycleList = johnsons.findSimpleCycles();
+	cycleList = (ArrayList<ArrayList<Principal>>) johnsons.findSimpleCycles();
     }
     @Override
     public int compareTo(ServerFile o) {
