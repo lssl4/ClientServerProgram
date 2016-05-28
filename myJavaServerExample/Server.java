@@ -95,15 +95,23 @@ while(true){
 
           // Writing the file as a certificate and put it in the
           // certificates folder
-          writeFile("Certificates/", ClientCom.substring(3), Integer.parseInt(in.readLine()),
-              socketInputStream);
+          writeFile("Certificates/", ClientCom.substring(3), Integer.parseInt(in.readLine()), socketInputStream);
 
           break;
 
         // Vouch file with a certificate
         case 'v':
 
-          filesys.vouchFile(ClientCom.substring(3), in.readLine());
+          if(!filesys.vouchFile(ClientCom.substring(3), in.readLine())){
+
+        	  resp.write("File was vouched successfully");
+      		resp.flush();
+          }else{
+
+        	  resp.write("File can not be vouched because it doesn't exist in the server and/or the certificate doesn't exist in the server");
+        		resp.flush();
+
+          }
 
           break;
 
@@ -319,10 +327,11 @@ while(true){
       return list;
     }
 
-    public void vouchFile(String filename, final String certname) throws FileNotFoundException, CertificateException {
+    public boolean vouchFile(String filename, final String certname) throws FileNotFoundException, CertificateException {
 
       // For each serverfile in the serverfile system, find the file with
       // the same name as filename
+    	boolean status = false;
       for (ServerFile f : serverFileSystem) {
 
         // if the ServerFile matches the name, add the certificate to the arraylist
@@ -344,9 +353,13 @@ while(true){
           X509Certificate genCert = (X509Certificate) certFac.generateCertificate(inputStream);
           f.certadd(genCert);
 
+          status= true;
+
         }
 
+
       }
+      return status;
 
     }
 
