@@ -33,9 +33,10 @@ public class Server {
       Socket sslsocket = ss.accept();
 
       InputStream socketInputStream = sslsocket.getInputStream();
+      OutputStream socketOutputStream = sslsocket.getOutputStream();
 
       BufferedReader in = new BufferedReader(new InputStreamReader(socketInputStream));
-	BufferedWriter resp = new BufferedWriter( new OutputStreamWriter(sslsocket.getOutputStream()));
+      BufferedWriter resp = new BufferedWriter( new OutputStreamWriter(socketOutputStream));
 
       // Print out the bufferedinputstream
       //System.out.println(in.readLine());
@@ -103,22 +104,17 @@ public class Server {
         case 'f':
 
         //File fetched = filesys.fetch(ClientCom.substring(3), certName, cir);
-	File fetched = new File("A.txt");
+	File fetched = new File(ClientCom.substring(3));
         // Get the size of the file
         long length = fetched.length();
-        byte[] bytes = new byte[16 * 1024];
-	InputStream fin = new FileInputStream(fetched);
-        OutputStream out = sslsocket.getOutputStream();
+        byte[] bytes = new byte[(int)length];
 	resp.write(String.valueOf(length)+ "\n");
 	resp.flush();
-
-	int count;
-        while ((count = fin.read(bytes)) > 0) {
-            out.write(bytes, 0, count);
-        }
-	out.flush();
-
-	out.close();
+	InputStream fin = new FileInputStream(fetched);
+        
+	
+        fin.read(bytes);
+	socketOutputStream.write(bytes, 0, (int)length);
 	fin.close();
 
           break;
