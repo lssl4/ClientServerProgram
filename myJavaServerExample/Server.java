@@ -236,7 +236,6 @@ while(true){
     public void add(String filename, byte[] input) throws FileNotFoundException, NoSuchAlgorithmException {
 
       // adding file into the filesystem array
-	System.out.println("hello");
 	ServerFile newFile = new ServerFile(filename, input);
 	int listLength = serverFileSystem.size();
 	int found = -1;
@@ -248,73 +247,64 @@ while(true){
 	}
 	if(found != -1){
 		serverFileSystem.remove(found);
-	}      		
+	}
 		serverFileSystem.add(newFile);
     }
 
 
     // http://stackoverflow.com/questions/4852531/find-files-in-a-folder-using-javas
     // -f filename -c size -n name
-    public File fetch(final String filename, String certname, Integer cir) {
+    public FileInputStream fetch(final String fname, String certname, Integer cir) {
 
       // initialize the arguments if null values are given
-	//https://github.com/jgrapht/jgrapht/wiki/DirectedGraphDemo
+	     //https://github.com/jgrapht/jgrapht/wiki/DirectedGraphDemo
       certname = certname != null ? certname : "";
       cir = cir != null ? cir : 0;
 
-      // Finding the appropriate file in the files directory
-      File f = new File("Files/");
-      File[] matchingFiles = f.listFiles(new FilenameFilter() {
-        public boolean accept(File dir, String name) {
-          return name.equals(filename);
-        }
-      });
+      // Finding the appropriate file in the files directory if it exists, otherwise return null
+      for(ServerFile f: serverFileSystem){
+    	  if(f.fileName.equals(fname)){
+    		  //Once the file is found, apply the isValid function to determine if the file can be returned to client, if not return null
+    		  if(f.isValid()){
 
+    			  return new FileInputStream("Files/"+fname);
+    		  }
 
+    	  }else{
 
-        return matching[0];
+    		  return null;
+    	  }
+      }
     }
 
     public String listFiles() {
       String list = "";
 
       for (ServerFile f : serverFileSystem) {
-        list += f.fileName + ": " /*+ f.maxCircle*/ + "\n";
+        list += f.fileName + ": " + f.maxCircle + "\n";
 
       }
 
       return list;
     }
 
-    public void vouchFile(String filename, final String cert) throws FileNotFoundException, CertificateException {
+    public void vouchFile(String filename, final String certname) throws FileNotFoundException, CertificateException {
 
       // For each serverfile in the serverfile system, find the file with
       // the same name as filename
       for (ServerFile f : serverFileSystem) {
 
-        // if the ServerFile matches the name, add the certificate to
-        // the arraylist
+        // if the ServerFile matches the name, add the certificate to the arraylist
         if (f.fileName.equals(filename)) {
 
-          // Find the certain certificate in the certificate
-          // directories
-          File certDir = new File("Certificates/");
-          File[] matchingCert = certDir.listFiles(new FilenameFilter() {
-
-            @Override
-            public boolean accept(File dir, String name) {
-
-              return name.equals(cert);
-            }
-          });
-
+        	// Find the certain certificate in the certificate directories
           // Once the certificate has been found, append to the
           // ServerFile certificate arraylist
           // From:
           // https://docs.oracle.com/javase/7/docs/api/java/security/cert/X509Certificate.htmls
           // (27052016)
 
-          FileInputStream inputStream = new FileInputStream(matchingCert[0]);
+          FileInputStream inputStream = new FileInputStream("Certificates/"+ certname);
 
           CertificateFactory certFac = CertificateFactory.getInstance("X.509");
 
