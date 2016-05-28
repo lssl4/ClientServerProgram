@@ -6,6 +6,7 @@ import os
 #https://carlo-hamalainen.net/blog/2013/1/24/python-ssl-socket-echo-test-with-self-signed-certificate
 #http://stackoverflow.com/questions/17695297/importing-the-private-key-public-certificate-pair-in-the-java-keystore
 usage = "usage: %prog [options] arg1 arg2"
+msgBuffer = 1024
 parser = OptionParser(usage = usage,add_help_option=False)
 parser.add_option("-p", "--help",action="store_true",dest="help",
                   help="show this help message")
@@ -51,24 +52,27 @@ else:
 
     if not(options.cert is None):
         sslSock.send("-u " + options.cert + "\n")
-        sslSock.read()
+        sslSock.read(msgBuffer)
     if not(options.valid is None):
         sslSock.send("-v " + options.valid[0] + " " + options.valid[1] + "\n")
-        sslSock.read()
+        sslSock.read(msgBuffer)
     if (options.namedCircle > 0):
         sslSock.send("-n "  + options.namedCircle + "\n")
-        sslSock.read()
+        sslSock.read(msgBuffer)
     if (options.circle > 0):
-        sslSock.send("-c " + str(circle) + "\n")
-        sslSock.read()
+        sslSock.send("-c " + str(options.circle) + "\n")
+        msg = sslSock.read(msgBuffer)
+        print(msg)
     if not(options.addfilename is None):
         f = open(options.addfilename,'r')
         print(str(os.path.getsize(options.addfilename)))
         sslSock.send(str(os.path.getsize(options.addfilename))+"\n")
         sslSock.sendall(f.read())
     if not(options.fetchfile is None):
-        sslSock.send("A.txt")
-        sslSock.read()
+        sslSock.send("-f "+ options.fetchfile + "\n")
+        leng = sslSock.read(msgBuffer)
+        f = sslSock.read()
+        print(leng)
     if (options.toList):
         data = "-l"
         sslSock.send(data)

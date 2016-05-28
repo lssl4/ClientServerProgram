@@ -35,6 +35,7 @@ public class Server {
       InputStream socketInputStream = sslsocket.getInputStream();
 
       BufferedReader in = new BufferedReader(new InputStreamReader(socketInputStream));
+	BufferedWriter resp = new BufferedWriter( new OutputStreamWriter(sslsocket.getOutputStream()));
 
       // Print out the bufferedinputstream
       //System.out.println(in.readLine());
@@ -79,6 +80,7 @@ public class Server {
           // add to the OurFileSystem object
           filesys.add(ClientCom.substring(3), rawFile);
 
+		
           break;
 
         // Upload a certificate case "-u":
@@ -100,7 +102,24 @@ public class Server {
 
         case 'f':
 
-          filesys.fetch(ClientCom.substring(3), certName, cir);
+        //File fetched = filesys.fetch(ClientCom.substring(3), certName, cir);
+	File fetched = new File("A.txt");
+        // Get the size of the file
+        long length = fetched.length();
+        byte[] bytes = new byte[16 * 1024];
+	InputStream fin = new FileInputStream(fetched);
+        OutputStream out = sslsocket.getOutputStream();
+	resp.write(String.valueOf(length)+ "\n");
+	resp.flush();
+
+	int count;
+        while ((count = fin.read(bytes)) > 0) {
+            out.write(bytes, 0, count);
+        }
+	out.flush();
+
+	out.close();
+	fin.close();
 
           break;
 
@@ -112,7 +131,9 @@ public class Server {
         case 'c':
 
           certName = ClientCom.substring(3);
-
+	
+		resp.write("Certificate circle length successful");
+		resp.flush();
           break;
 
         default:
@@ -128,7 +149,7 @@ public class Server {
       sslsocket.close();
 
     } catch (Exception exception) {
-      System.out.println("Unable to start ClassServer: " + exception.getMessage());
+      System.out.println("Unable to start Server: " + exception.getMessage());
       exception.printStackTrace();
     }
 
@@ -212,6 +233,7 @@ public class Server {
 
     }
 
+
     // http://stackoverflow.com/questions/4852531/find-files-in-a-folder-using-javas
     // -f filename -c size -n name
     public File fetch(final String filename, String certname, Integer cir) {
@@ -227,7 +249,8 @@ public class Server {
           return name.equals(filename);
         }
       });
-
+	    return matchingFiles[0];
+	    /*
       // find file in the serverFileSystem to check if the conditions have
       // been met to be fetched
       for (ServerFile obj : serverFileSystem) {
@@ -247,11 +270,7 @@ public class Server {
           return matchingFiles[0];
 
         }
-
-      }
-
-      return null;
-
+*/
     }
 
     public String listFiles() {
