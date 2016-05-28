@@ -30,6 +30,7 @@ public class Server {
 
       ServerSocketFactory ssf = getServerSocketFactory(type);
       ServerSocket ss = ssf.createServerSocket(port);
+while(true){
       Socket sslsocket = ss.accept();
 
       InputStream socketInputStream = sslsocket.getInputStream();
@@ -54,7 +55,7 @@ public class Server {
       String ClientCom;
 
       while ((ClientCom = in.readLine()) != null) {
-
+	System.out.println(ClientCom);
         // The circle circumference and certificate name. Commands are
         // used to assign them values.
         int cir = 0;
@@ -74,12 +75,13 @@ public class Server {
         case 'a':
 
           // Write the file to the server directory
-          byte[] rawFile = writeFile("Files/", ClientCom.substring(3), Integer.parseInt(in.readLine()),
+		String filename = ClientCom.substring(3);
+          byte[] rawFile = writeFile("Files/",filename , Integer.parseInt(in.readLine()),
               socketInputStream);
 
           // passes the filename and raw file array to add method to
           // add to the OurFileSystem object
-          filesys.add(ClientCom.substring(3), rawFile);
+          filesys.add(filename, rawFile);
 
 		
           break;
@@ -143,6 +145,7 @@ public class Server {
       in.close();
 
       sslsocket.close();
+	}
 
     } catch (Exception exception) {
       System.out.println("Unable to start Server: " + exception.getMessage());
@@ -150,6 +153,7 @@ public class Server {
     }
 
   }
+
 
   // This method was obtained from:
   // http://docs.oracle.com/javase/1.5.0/docs/guide/security/jsse/samples/sockets/server/ClassFileServer.java
@@ -195,6 +199,7 @@ public class Server {
 
     OutputStream output = new FileOutputStream(type + filename);
 
+
     // Make a byte array to be the length of incoming data stream to
     // populate it with the raw data file
     byte[] fileBytes = new byte[fileSize];
@@ -202,6 +207,10 @@ public class Server {
     // Obtaining the number of bytes that is read and use that to write the
     // file using the fileBytes
     int count = inStream.read(fileBytes);
+	if(count!=fileSize){
+		System.out.println("error reading file");
+		return null;
+}
     output.write(fileBytes, 0, count);
 
     // Close output stream
@@ -224,9 +233,20 @@ public class Server {
     public void add(String filename, byte[] input) throws FileNotFoundException, NoSuchAlgorithmException {
 
       // adding file into the filesystem array
-      ServerFile newFile = new ServerFile(filename, input);
-      serverFileSystem.add(newFile);
-
+	System.out.println("hello");
+	ServerFile newFile = new ServerFile(filename, input);
+	int listLength = serverFileSystem.size();
+	int found = -1;
+	for (int i = 0; i < listLength; i++){
+		if(serverFileSystem.get(i).fileName.equals(filename)){
+			found = i;
+			break;
+		}
+	}
+	if(found != -1){
+		serverFileSystem.remove(found);
+	}      		
+		serverFileSystem.add(newFile);
     }
 
 
@@ -235,6 +255,7 @@ public class Server {
     public File fetch(final String filename, String certname, Integer cir) {
 
       // initialize the arguments if null values are given
+	//https://github.com/jgrapht/jgrapht/wiki/DirectedGraphDemo
       certname = certname != null ? certname : "";
       cir = cir != null ? cir : 0;
 

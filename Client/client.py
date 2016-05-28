@@ -67,6 +67,7 @@ else:
     if not(options.addfilename is None):
         f = open(options.addfilename,'r')
         print(str(os.path.getsize(options.addfilename)))
+        sslSock.send("-a " + options.addfilename+"\n")
         sslSock.send(str(os.path.getsize(options.addfilename))+"\n")
         sslSock.sendall(f.read())
         
