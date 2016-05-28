@@ -236,7 +236,6 @@ while(true){
     public void add(String filename, byte[] input) throws FileNotFoundException, NoSuchAlgorithmException {
 
       // adding file into the filesystem array
-	System.out.println("hello");
 	ServerFile newFile = new ServerFile(filename, input);
 	int listLength = serverFileSystem.size();
 	int found = -1;
@@ -294,42 +293,30 @@ while(true){
       String list = "";
 
       for (ServerFile f : serverFileSystem) {
-        list += f.fileName + ": " /*+ f.maxCircle*/ + "\n";
+        list += f.fileName + ": " + f.maxCircle + "\n";
 
       }
 
       return list;
     }
 
-    public void vouchFile(String filename, final String cert) throws FileNotFoundException, CertificateException {
+    public void vouchFile(String filename, final String certname) throws FileNotFoundException, CertificateException {
 
       // For each serverfile in the serverfile system, find the file with
       // the same name as filename
       for (ServerFile f : serverFileSystem) {
 
-        // if the ServerFile matches the name, add the certificate to
-        // the arraylist
+        // if the ServerFile matches the name, add the certificate to the arraylist
         if (f.fileName.equals(filename)) {
 
-          // Find the certain certificate in the certificate
-          // directories
-          File certDir = new File("Certificates/");
-          File[] matchingCert = certDir.listFiles(new FilenameFilter() {
-
-            @Override
-            public boolean accept(File dir, String name) {
-
-              return name.equals(cert);
-            }
-          });
-
+        	// Find the certain certificate in the certificate directories
           // Once the certificate has been found, append to the
           // ServerFile certificate arraylist
           // From:
           // https://docs.oracle.com/javase/7/docs/api/java/security/cert/X509Certificate.htmls
           // (27052016)
 
-          FileInputStream inputStream = new FileInputStream(matchingCert[0]);
+          FileInputStream inputStream = new FileInputStream("Certificates/"+ certname);
 
           CertificateFactory certFac = CertificateFactory.getInstance("X.509");
 
@@ -353,7 +340,7 @@ while(true){
     ArrayList<X509Certificate> certificates;
     ArrayList<ArrayList<Principal>> cycleList;
     DefaultDirectedGraph<Principal,DefaultEdge> graph;
-    //int maxCircle;
+    int maxCircle;
 
     public ServerFile(String name, byte[] rawFile) throws NoSuchAlgorithmException {
 
