@@ -3,6 +3,7 @@ import ssl
 import hashlib
 from optparse import OptionParser
 import os
+import sys
 #https://carlo-hamalainen.net/blog/2013/1/24/python-ssl-socket-echo-test-with-self-signed-certificate
 #http://stackoverflow.com/questions/17695297/importing-the-private-key-public-certificate-pair-in-the-java-keystore
 usage = "usage: %prog [options] arg1 arg2"
@@ -48,7 +49,7 @@ else:
     s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     sslSock = ctx.wrap_socket(s)
     sslSock.connect((hostInfo[0],int(hostInfo[1])))
-    sslSock.send("hi\n")
+    #sslSock.send("hi\n")
 
     if not(options.cert is None):
         sslSock.send("-u " + options.cert + "\n")
@@ -62,22 +63,26 @@ else:
     if (options.circle > 0):
         sslSock.send("-c " + str(options.circle) + "\n")
         msg = sslSock.read(msgBuffer)
-        print(msg)
+        print >>sys.stderr, msg
     if not(options.addfilename is None):
         f = open(options.addfilename,'r')
         print(str(os.path.getsize(options.addfilename)))
         sslSock.send(str(os.path.getsize(options.addfilename))+"\n")
         sslSock.sendall(f.read())
+        
     if not(options.fetchfile is None):
         sslSock.send("-f "+ options.fetchfile + "\n")
-        leng = sslSock.read(msgBuffer)
-        f = sslSock.read()
-        print(leng)
+        leng = int(sslSock.read())
+        f = sslSock.read(leng)
+        while(len(f)<leng):
+            f += sslSock.read(leng-len(f))
+        sys.stdout.write(f)
+        
     if (options.toList):
         data = "-l"
         sslSock.send(data)
         
-    sslSock.send("hi2\n")
+    #sslSock.send("hi2\n")
     #msg = str(sslSock.read(24))
     #print(msg)
     sslSock.close()
