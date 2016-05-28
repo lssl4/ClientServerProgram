@@ -14,7 +14,7 @@ import java.util.*;
 public class Server {
 
   private static OurFileSystem filesys;
-  private static String type = "TLS";
+  private static String type = "SSL";
   private static int port = 2323;
 
   public Server() {
@@ -60,16 +60,16 @@ public class Server {
 
         String flag = ClientCom.substring(0, 2);
 
-        switch (flag) {
+        switch (flag.charAt(1)) {
 
         // List all the files in directory case "-l":
-        case "-l":
+        case 'l':
           filesys.listFiles();
 
           break;
 
         // Add a new file case "-a":
-        case "-a":
+        case 'a':
 
           // Write the file to the server directory
           byte[] rawFile = writeFile("Files/", ClientCom.substring(3), Integer.parseInt(in.readLine()),
@@ -82,7 +82,7 @@ public class Server {
           break;
 
         // Upload a certificate case "-u":
-        case "-u":
+        case 'u':
 
           // Writing the file as a certificate and put it in the
           // certificates folder
@@ -92,24 +92,24 @@ public class Server {
           break;
 
         // Vouch file with a certificate
-        case "-v":
+        case 'v':
 
           filesys.vouchFile(ClientCom.substring(3), in.readLine());
 
           break;
 
-        case "-f":
+        case 'f':
 
           filesys.fetch(ClientCom.substring(3), certName, cir);
 
           break;
 
-        case "-n":
+        case 'n':
           cir = Integer.parseInt(ClientCom.substring(3));
 
           break;
 
-        case "-c":
+        case 'c':
 
           certName = ClientCom.substring(3);
 
@@ -138,7 +138,7 @@ public class Server {
   // http://docs.oracle.com/javase/1.5.0/docs/guide/security/jsse/samples/sockets/server/ClassFileServer.java
   // (27 May 2016)
   private static ServerSocketFactory getServerSocketFactory(String type) {
-    if (type.equals("TLS")) {
+    if (type.equals(type)) {
       SSLServerSocketFactory ssf = null;
       try {
         // set up key manager to do server authentication
@@ -147,7 +147,7 @@ public class Server {
         KeyStore ks;
         char[] passphrase = "cits3002".toCharArray();
 
-        ctx = SSLContext.getInstance("TLS");
+        ctx = SSLContext.getInstance(type);
         kmf = KeyManagerFactory.getInstance("SunX509");
         ks = KeyStore.getInstance("JKS");
 
