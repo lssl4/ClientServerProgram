@@ -270,34 +270,9 @@ while(true){
         }
       });
 
-      // find file in the serverFileSystem to check if the conditions have
-      // been met to be fetched
 
 
-        for (ServerFile obj : serverFileSystem) {
-        ArrayList<X509Certificate> listOfCerts = obj.certificates;
-
-        // Getting all of the list of name from the ServerFile
-        // certificates
-        ArrayList<String> listOfNames = new ArrayList<String>();
-        for (X509Certificate cert : listOfCerts) {
-
-          listOfNames.add(cert.getSubjectX500Principal().getName());
-
-        }
-
-        if (obj.fileName.equals(filename) && obj.certificates.size() >= cir && listOfNames.contains(certname)) {
-
-          return matchingFiles[0];
-
-        }
-
-
-        }
-
-
-
-        return null;
+        return matching[0];
     }
 
     public String listFiles() {
@@ -346,7 +321,7 @@ while(true){
           // Once the stream has been converted to a certificate,
           // add it to the ServerFile certificate array
           X509Certificate genCert = (X509Certificate) certFac.generateCertificate(inputStream);
-          f.certificates.add(genCert);
+          f.certadd(genCert);
 
         }
 
@@ -359,22 +334,63 @@ while(true){
   public class ServerFile implements Comparable<ServerFile> {
 
     String fileName;
-    byte[] hash;
-    ArrayList<X509Certificate> certificates;
-    ArrayList<ArrayList<Principal>> cycleList;
-    DefaultDirectedGraph<Principal,DefaultEdge> graph;
-    //int maxCircle;
+    //byte[] hash;
+    private ArrayList<X509Certificate> certificates;
+    private ArrayList<ArrayList<Principal>> cycleList;
+    private DefaultDirectedGraph<Principal,DefaultEdge> graph;
+    private ArrayList<Principal> vertexs;
+    int maxCircle;
 
     public ServerFile(String name, byte[] rawFile) throws NoSuchAlgorithmException {
 
-      fileName = name;
-      hash = MessageDigest.getInstance("MD5").digest(rawFile);
-      certificates = new ArrayList<X509Certificate>();
-
-
-
+	fileName = name;
+	//hash = MessageDigest.getInstance("MD5").digest(rawFile);
+	certificates = new ArrayList<X509Certificate>();
+	graph = new DefaultDirectedGraph<Principal,DefaultEdge>(DefaultEdge.class);
+	vertexs = new ArrayList<Principal>();
     }
-
+    public void certadd(X509Certificate cert){
+	Principal issuer = cert.getIssuerDN();
+	Principal subject = cert.getSubjectDN();
+	if(!vertexs.contains(issuer)){
+	    vertexs.add(issuer);
+	    graph.addVertex(issuer);
+	}
+	if(!vertexs.contains(subject)){
+	    vertexs.add(subject);
+	    graph.addVertex(subject);
+	}
+	graph.addEdge(subject,issuer);
+	constructCycles();
+    }
+    public boolean isValid(int cycleSize, String certname){
+	int arraySize;
+	int innerArraySize;
+	if(cycleSize != 0 || certname != null){
+	    arraySize = cycleList.size();
+	    for(int i = 0;i<arraySize;i++){
+		innerArraySize = cyclelist.get(i).size();
+		if(innerArraylistSize >= cycleSize){
+		    if(certname==null){
+			return true;
+		    }else{
+			for(int j = 0;j<innerArraySize;j++){
+			    if(cyclelist.get(i).get(j).getName().equals(certname)){
+				return true;
+			    }
+			}
+		    }
+		}
+	    }
+	    return false;
+	}else{
+	    return true;
+	} 
+    }   
+    private void constructCycles(){
+	JohnsonSimpleCycles johnsons = new JohnsonSimpleCycles(graph);
+	cycleList = johnsons.findSimpleCycles();
+    }
     @Override
     public int compareTo(ServerFile o) {
 
