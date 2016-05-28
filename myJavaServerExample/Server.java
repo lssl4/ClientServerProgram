@@ -110,7 +110,7 @@ while(true){
         case 'f':
 
         //File fetched = filesys.fetch(ClientCom.substring(3), certName, cir);
-	File fetched = new File(ClientCom.substring(3));
+/*	File fetched = new File(ClientCom.substring(3));
         // Get the size of the file
         long length = fetched.length();
         byte[] bytes = new byte[(int)length];
@@ -121,7 +121,26 @@ while(true){
 
         fin.read(bytes);
 	socketOutputStream.write(bytes, 0, (int)length);
-	fin.close();
+	fin.close();*/
+
+        	File fetched;
+
+        	//If the file exists, send to client, if not send an error message
+        	if((fetched = filesys.fetch(ClientCom.substring(3), certName, cir))!=null){
+
+        		 long length = fetched.length();
+        	        byte[] bytes = new byte[(int)length];
+        	        InputStream fin = new FileInputStream(fetched);
+        	        fin.read(bytes);
+        	        socketOutputStream.write(bytes, 0, (int)length);
+        	        fin.close();
+
+
+        	}else{
+
+        		resp.write("File can not be fetched because it doesn't exist in the server");
+        		resp.flush();
+        	}
 
           break;
 
@@ -255,14 +274,14 @@ while(true){
 
     // http://stackoverflow.com/questions/4852531/find-files-in-a-folder-using-javas
     // -f filename -c size -n name
-    public FileInputStream fetch(final String fname, String certname, Integer cir) throws FileNotFoundException {
+    public File fetch(final String fname, String certname, Integer cir) throws FileNotFoundException {
 
       // initialize the arguments if null values are given
 	     //https://github.com/jgrapht/jgrapht/wiki/DirectedGraphDemo
       certname = certname != null ? certname : "";
       cir = cir != null ? cir : 0;
 
-      FileInputStream output = null;
+      File output = null;
 
       //If the serverFileSystem empty, return null to indicate no file exists
       if(serverFileSystem.isEmpty()){
@@ -277,7 +296,7 @@ while(true){
     		  //Once the file is found, apply the isValid function to determine if the file can be returned to client, if not return null
     		  if(f.isValid(cir, certname)){
 
-    			  output = new FileInputStream("Files/"+fname);
+    			  output = new File("Files/"+fname);
     		  }
 
     	  }
@@ -390,8 +409,18 @@ while(true){
 	}
     }
     private void constructCycles(){
-	JohnsonSimpleCycles johnsons = new JohnsonSimpleCycles(graph);
-	cycleList = (ArrayList<ArrayList<Principal>>) johnsons.findSimpleCycles();
+	JohnsonSimpleCycles<Principal,DefaultEdge> johnsons = new JohnsonSimpleCycles<Principal,DefaultEdge>(graph);
+
+	//Changing the values of findSimpleCycles to an ArrayList<ArrayList<Principal>>
+	List<List<Principal>> johnsonsListRep = johnsons.findSimpleCycles();
+	for(int i = 0; i < johnsonsListRep.size(); i++){
+
+		ArrayList<Principal> innerArray = new ArrayList<Principal>(johnsonsListRep.get(i));
+
+		cycleList.add(innerArray);
+	}
+
+
     }
     @Override
     public int compareTo(ServerFile o) {
