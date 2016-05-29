@@ -33,7 +33,7 @@ public class Server implements Serializable {
 	}
 	public Server(String servName){
 	    try{
-	    this.serilizedName = servName
+	    this.serializedName = servName;
 	    this.filesys = readServerFromDisk(serializedName);
 	    }catch(Exception e){
 		System.out.println("Error while Reading: " + e.getMessage());
@@ -91,10 +91,17 @@ public class Server implements Serializable {
 
 						// List all the files in directory case "-l":
 						case 'l':
-
-
-							resp.write(filesys.listFiles());
+							int size = filesys.serverFileSystem.size();
+							resp.write(size+"\n");
 							resp.flush();
+
+							for(int i = 0; i < size; i++){
+
+								resp.write(filesys.serverFileSystem.get(i).fileName +"\n");
+								resp.flush();
+							}
+
+
 
 							break;
 
@@ -323,7 +330,7 @@ public class Server implements Serializable {
 	public class OurFileSystem implements Serializable {
 		private static final long serialVersionUID = 3694190900322266196L;
 
-		private ArrayList<ServerFile> serverFileSystem = new ArrayList<ServerFile>();
+		ArrayList<ServerFile> serverFileSystem = new ArrayList<ServerFile>();
 
 		public OurFileSystem() throws IOException {
 
@@ -428,7 +435,7 @@ public class Server implements Serializable {
 
 	}
 
-	public class ServerFile implements Serializable {
+	public class ServerFile implements Serializable, Comparable<ServerFile>{
 
 
 		String fileName;
@@ -529,6 +536,13 @@ public class Server implements Serializable {
 			return maxSize;
 
 		}
+
+		@Override
+		public int compareTo(ServerFile o) {
+
+			return o.fileName.compareTo(this.fileName);
+		}
+
 
 
 
