@@ -80,12 +80,10 @@ while(true){
 
           // Write the file to the server directory
 		String filename = ClientCom.substring(3);
-          byte[] rawFile = writeFile("Files/",filename , Integer.parseInt(in.readLine()),
-              socketInputStream);
 
-          // passes the afilename and raw file array to add method to
+          // passes the filename to add method to
           // add to the OurFileSystem object
-          filesys.add(filename, rawFile);
+          filesys.add(filename);
 
 
           break;
@@ -261,10 +259,10 @@ while(true){
 
     }
 
-    public void add(String filename, byte[] input) throws FileNotFoundException, NoSuchAlgorithmException {
+    public void add(String filename) throws FileNotFoundException, NoSuchAlgorithmException {
 
       // adding file into the filesystem array
-	ServerFile newFile = new ServerFile(filename, input);
+	ServerFile newFile = new ServerFile(filename);
 	int listLength = serverFileSystem.size();
 	int found = -1;
 	for (int i = 0; i < listLength; i++){
@@ -351,7 +349,7 @@ while(true){
           // Once the stream has been converted to a certificate,
           // add it to the ServerFile certificate array
           X509Certificate genCert = (X509Certificate) certFac.generateCertificate(inputStream);
-          f.certadd(genCert);
+          f.certAdd(genCert);
 
           status= true;
 
@@ -368,35 +366,37 @@ while(true){
   public class ServerFile implements Comparable<ServerFile> {
 
     String fileName;
-    //byte[] hash;
     private ArrayList<X509Certificate> certificates;
     private ArrayList<ArrayList<Principal>> cycleList;
     private DefaultDirectedGraph<Principal,DefaultEdge> graph;
-    private ArrayList<Principal> vertexs;
+    private ArrayList<Principal> vertices;
     int maxCircle;
 
-    public ServerFile(String name, byte[] rawFile) throws NoSuchAlgorithmException {
+    public ServerFile(String name) throws NoSuchAlgorithmException {
 
 	fileName = name;
-	//hash = MessageDigest.getInstance("MD5").digest(rawFile);
 	certificates = new ArrayList<X509Certificate>();
 	graph = new DefaultDirectedGraph<Principal,DefaultEdge>(DefaultEdge.class);
-	vertexs = new ArrayList<Principal>();
+	vertices = new ArrayList<Principal>();
     }
-    public void certadd(X509Certificate cert){
+
+    //Add certificate's issuer and subjects to the vertices arraylist and then the graph
+    public void certAdd(X509Certificate cert){
 	Principal issuer = cert.getIssuerDN();
 	Principal subject = cert.getSubjectDN();
-	if(!vertexs.contains(issuer)){
-	    vertexs.add(issuer);
+	if(!vertices.contains(issuer)){
+		vertices.add(issuer);
 	    graph.addVertex(issuer);
 	}
-	if(!vertexs.contains(subject)){
-	    vertexs.add(subject);
+	if(!vertices.contains(subject)){
+		vertices.add(subject);
 	    graph.addVertex(subject);
 	}
 	graph.addEdge(subject,issuer);
 	constructCycles();
     }
+
+    //Outputs a boolean if the file is valid to be fetched
     public boolean isValid(int cycleSize, String certname){
 	int arraySize;
 	int innerArraySize;
@@ -421,6 +421,8 @@ while(true){
 	    return true;
 	}
     }
+
+
     private void constructCycles(){
 	JohnsonSimpleCycles<Principal,DefaultEdge> johnsons = new JohnsonSimpleCycles<Principal,DefaultEdge>(graph);
 
