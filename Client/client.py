@@ -57,20 +57,25 @@ else:
         sslSock.send("-u " + options.cert + "\n")
         sslSock.send(str(os.path.getsize(options.cert))+"\n")
         sslSock.sendall(f.read())
+        
     if not(options.valid is None):
         sslSock.send("-v " + options.valid[0] + "\n" + options.valid[1] + "\n")
         msg = sslSock.read(msgBuffer)
         print >>sys.stderr, msg
+        
     if (options.namedCircle > 0):
         sslSock.send("-n "  + options.namedCircle + "\n")
-        sslSock.read(msgBuffer)
+        msg = sslSock.read(msgBuffer)
+        print >>sys.stderr, msg
+        
     if (options.circle > 0):
         sslSock.send("-c " + str(options.circle) + "\n")
         msg = sslSock.read(msgBuffer)
         print >>sys.stderr, msg
+        
     if not(options.addfilename is None):
         f = open(options.addfilename,'r')
-        print(str(os.path.getsize(options.addfilename)))
+        #print(str(os.path.getsize(options.addfilename)))
         sslSock.send("-a " + options.addfilename+"\n")
         sslSock.send(str(os.path.getsize(options.addfilename))+"\n")
         sslSock.sendall(f.read())
@@ -100,14 +105,10 @@ else:
             lines += n;
             n = sslSock.read(1)
         #reading file names now
+        print("Files Found = " + lines)
         for x in range(0,int(lines)+1):
             m = ""
             while m != "\n":
                 m += sslSock.read(1)
-            sys.stdout.write(m)
-
-    #print("here")
-    #sslSock.send("hi2\n")
-    #msg = str(sslSock.read(24))
-    #print(msg)
+            print(m)
     sslSock.close()
