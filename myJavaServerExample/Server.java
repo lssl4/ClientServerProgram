@@ -9,7 +9,6 @@ import java.io.*;
 import java.net.*;
 import java.security.cert.*;
 import java.security.KeyStore;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.util.*;
@@ -17,25 +16,29 @@ import java.util.*;
 //http://stilius.net/java/java_ssl.php and http://docs.oracle.com/javase/1.5.0/docs/guide/security/jsse/samples/sockets/server/ClassFileServer.java
 public class Server {
 
-  private static OurFileSystem filesys;
-  private static String type = "SSL";
-  private static int port = 2323;
+  private  OurFileSystem filesys;
+  private  String type;
+  private  int port;
+  private static Socket sslsocket;
 
-  public Server() {
-    try {
+  public Server() throws IOException {
       filesys = new OurFileSystem();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
-  public static void main(String[] args) {
-    try {
-
+      type = "SSL";
+      port = 2323;
       ServerSocketFactory ssf = getServerSocketFactory(type);
       ServerSocket ss = ssf.createServerSocket(port);
-while(true){
-      Socket sslsocket = ss.accept();
+
+      Socket sslsocket =  ss.accept();
+
+
+  }
+
+  public void run() throws IOException, NoSuchAlgorithmException, CertificateException{
+
+
+
+    	while(true){
+
 
       InputStream socketInputStream = sslsocket.getInputStream();
       OutputStream socketOutputStream = sslsocket.getOutputStream();
@@ -80,6 +83,7 @@ while(true){
 
           // Write the file to the server directory
 		String filename = ClientCom.substring(3);
+		System.out.println(filename);
 
           // passes the filename to add method to
           // add to the OurFileSystem object
@@ -176,12 +180,9 @@ while(true){
       sslsocket.close();
 	}
 
-    } catch (Exception exception) {
-      System.out.println("Unable to start Server: " + exception.getMessage());
-      exception.printStackTrace();
     }
 
-  }
+
 
 
   // This method was obtained from:
@@ -359,7 +360,7 @@ while(true){
 
   }
 
-  public class ServerFile implements Comparable<ServerFile> {
+  public class ServerFile{
 
     String fileName;
     private ArrayList<X509Certificate> certificates;
@@ -380,6 +381,10 @@ while(true){
 
     //Add certificate's issuer and subjects to the vertices arraylist and then the graph
     public void certAdd(X509Certificate cert){
+
+    	//adding cert to certificates arraylist
+    	certificates.add(cert);
+
 	Principal issuer = cert.getIssuerDN();
 	Principal subject = cert.getSubjectDN();
 	if(!vertices.contains(issuer)){
@@ -457,12 +462,6 @@ while(true){
 
 	}
 
-
-	@Override
-    public int compareTo(ServerFile o) {
-
-      return o.fileName.compareTo(this.fileName);
-    }
 
   }
 
