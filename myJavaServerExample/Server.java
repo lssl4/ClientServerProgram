@@ -289,11 +289,7 @@ while(true){
 
       File output = null;
 
-      //If the serverFileSystem empty, return null to indicate no file exists
-      if(serverFileSystem.isEmpty()){
 
-    	  return null;
-      }else{
 
 
       // Finding the appropriate file in the files directory if it exists, otherwise return null
@@ -308,7 +304,7 @@ while(true){
     	  }
       }
 
-      }
+
 	return output;
 
 
@@ -318,7 +314,7 @@ while(true){
       String list = "";
 
       for (ServerFile f : serverFileSystem) {
-        list += f.fileName + ": " + f.maxCircle + "\n";
+        list += f.fileName + ": " + f.maxCircle.size() + "\n";
 
       }
 
@@ -370,7 +366,7 @@ while(true){
     private ArrayList<ArrayList<Principal>> cycleList;
     private DefaultDirectedGraph<Principal,DefaultEdge> graph;
     private ArrayList<Principal> vertices;
-    int maxCircle;
+    ArrayList<Principal> maxCircle;
 
     public ServerFile(String name) throws NoSuchAlgorithmException {
 
@@ -378,6 +374,8 @@ while(true){
 	certificates = new ArrayList<X509Certificate>();
 	graph = new DefaultDirectedGraph<Principal,DefaultEdge>(DefaultEdge.class);
 	vertices = new ArrayList<Principal>();
+	maxCircle = findMaxCircle();
+
     }
 
     //Add certificate's issuer and subjects to the vertices arraylist and then the graph
@@ -422,7 +420,7 @@ while(true){
 	}
     }
 
-
+    //Find all the cycles in the graph and add it to the cyclelist
     private void constructCycles(){
 	JohnsonSimpleCycles<Principal,DefaultEdge> johnsons = new JohnsonSimpleCycles<Principal,DefaultEdge>(graph);
 
@@ -436,8 +434,26 @@ while(true){
 	}
 
 
+
     }
-    @Override
+
+
+	//Find the cycle with the largest number of nodes. need TODO
+	private ArrayList<Principal> findMaxCircle(){
+
+		ArrayList<Principal> max = null;
+
+		for(ArrayList<Principal> cycle: cycleList){
+
+			//if(cycle.size() > max) max = cycle.size();
+
+		}
+		return max;
+
+	}
+
+
+	@Override
     public int compareTo(ServerFile o) {
 
       return o.fileName.compareTo(this.fileName);
