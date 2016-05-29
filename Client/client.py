@@ -42,7 +42,7 @@ if options.help:
 elif (options.hostname is None):
     print("hostname required")
     exit
-else:  
+else:
     hostInfo = options.hostname.split(':')
     ctx = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH,cafile="serv.pem")
     ctx.check_hostname = False
@@ -73,19 +73,20 @@ else:
         sslSock.send("-a " + options.addfilename+"\n")
         sslSock.send(str(os.path.getsize(options.addfilename))+"\n")
         sslSock.sendall(f.read())
-        
+
     if not(options.fetchfile is None):
         sslSock.send("-f "+ options.fetchfile + "\n")
+        print(sslSock.read())
         leng = int(sslSock.read())
         f = sslSock.read(leng)
         while(len(f)<leng):
             f += sslSock.read(leng-len(f))
         sys.stdout.write(f)
-        
+
     if (options.toList):
         data = "-l"
         sslSock.send(data)
-        
+
     #sslSock.send("hi2\n")
     #msg = str(sslSock.read(24))
     #print(msg)

@@ -314,7 +314,7 @@ while(true){
       String list = "";
 
       for (ServerFile f : serverFileSystem) {
-        list += f.fileName + ": " + f.maxCircle.size() + "\n";
+        list += f.fileName + ": " + f.maxCircle + "\n";
 
       }
 
@@ -366,7 +366,7 @@ while(true){
     private ArrayList<ArrayList<Principal>> cycleList;
     private DefaultDirectedGraph<Principal,DefaultEdge> graph;
     private ArrayList<Principal> vertices;
-    ArrayList<Principal> maxCircle;
+    int maxCircle;
 
     public ServerFile(String name) throws NoSuchAlgorithmException {
 
@@ -374,7 +374,7 @@ while(true){
 	certificates = new ArrayList<X509Certificate>();
 	graph = new DefaultDirectedGraph<Principal,DefaultEdge>(DefaultEdge.class);
 	vertices = new ArrayList<Principal>();
-	maxCircle = findMaxCircle();
+	maxCircle = 0;
 
     }
 
@@ -433,15 +433,15 @@ while(true){
 		cycleList.add(innerArray);
 	}
 
+	findMaxCircle();
 
 
     }
 
 
-	//Find the cycle with the largest number of nodes. need TODO
-	private ArrayList<Principal> findMaxCircle(){
+	//Find the cycle with the largest number of nodes.
+	private int findMaxCircle(){
 
-		ArrayList<Principal> max = null;
 		int maxSize =0;
 
 		for(ArrayList<Principal> cycle: cycleList){
@@ -450,11 +450,10 @@ while(true){
 
 				maxSize = cycle.size();
 
-				max = cycle;
 			}
 
 		}
-		return max;
+		return maxSize;
 
 	}
 
