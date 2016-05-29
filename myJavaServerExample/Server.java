@@ -25,21 +25,29 @@ public class Server implements Serializable {
 	private String type = "SSL";
 	private int port = 2323;
 
-	public Server() {
-		try {
+	public Server() throws IOException {
+
 			filesys = new OurFileSystem();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+
 	}
-	public Server(String servName){
-	    try{
-	    this.serializedName = servName;
+	public Server(String servName) throws  IOException{
+		this.serializedName = servName;
+
+		try{
 	    this.filesys = readServerFromDisk(serializedName);
-	    }catch(Exception e){
-		System.out.println("Error while Reading: " + e.getMessage());
-		e.printStackTrace();
-	    }
+
+		System.out.println("Error while Reading: " );
+		}catch(ClassNotFoundException e){
+
+			System.out.println("Error loading serverFileSystem: " + e.getMessage());
+			e.printStackTrace();
+
+			filesys = new OurFileSystem();
+
+
+		}
+
+
 	}
 
 
@@ -100,7 +108,7 @@ public class Server implements Serializable {
 
 								ServerFile file  = filesys.serverFileSystem.get(i);
 
-								resp.write(file.fileName + "\t"+ file.maxCircle +"\n");
+								resp.write(file.fileName + ": "+ file.maxCircle +"\n");
 								resp.flush();
 							}
 
@@ -253,20 +261,15 @@ public class Server implements Serializable {
 		i.printStackTrace();
 	    }
 	}
-	private OurFileSystem readServerFromDisk(String servername){
+	private OurFileSystem readServerFromDisk(String servername) throws IOException, ClassNotFoundException{
 	    OurFileSystem files = null;
-	    try
-	    {
+
 		FileInputStream fileIn = new FileInputStream("Serialized/" + servername);
 		ObjectInputStream serIn = new ObjectInputStream(fileIn);
 		files = (OurFileSystem) serIn.readObject();
 		serIn.close();
 		fileIn.close();
-	    }catch(Exception i)
-	    {
-	     System.out.println("Unable to read Server: " + i.getMessage());
-             i.printStackTrace();
-	    }
+
 	    return files;
 	}
 
@@ -528,7 +531,7 @@ public class Server implements Serializable {
 		}
 
 		// Find the cycle with the largest number of nodes.
-		private int findMaxCircle() {
+		private void findMaxCircle() {
 
 			int maxSize = 0;
 
@@ -541,7 +544,7 @@ public class Server implements Serializable {
 				}
 
 			}
-			return maxSize;
+			maxCircle= maxSize;
 
 		}
 
