@@ -199,13 +199,15 @@ public class Server implements Serializable {
 						case 'n':
 							certName = ClientCom.substring(3);
 
+							resp.write("Name received");
+							resp.flush();
 							break;
 
 						case 'c':
 
 							cir = Integer.parseInt(ClientCom.substring(3));
 
-							resp.write("Certificate circle length successful");
+							resp.write("Certificate circle length received");
 							resp.flush();
 							break;
 
