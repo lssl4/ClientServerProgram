@@ -442,10 +442,16 @@ while(true){
 	private ArrayList<Principal> findMaxCircle(){
 
 		ArrayList<Principal> max = null;
+		int maxSize =0;
 
 		for(ArrayList<Principal> cycle: cycleList){
 
-			//if(cycle.size() > max) max = cycle.size();
+			if(cycle.size() > maxSize){
+
+				maxSize = cycle.size();
+
+				max = cycle;
+			}
 
 		}
 		return max;
