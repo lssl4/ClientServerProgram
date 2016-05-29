@@ -19,9 +19,9 @@ import java.util.*;
 //http://stilius.net/java/java_ssl.php and http://docs.oracle.com/javase/1.5.0/docs/guide/security/jsse/samples/sockets/server/ClassFileServer.java
 public class Server {
 
-	private  OurFileSystem filesys;
-	private  String type = "SSL";
-	private  int port = 2323;
+	private OurFileSystem filesys;
+	private String type = "SSL";
+	private int port = 2323;
 
 	public Server() {
 		try {
@@ -31,196 +31,190 @@ public class Server {
 		}
 	}
 
-
-
 	public void run() {
 		try {
 
 			ServerSocketFactory ssf = getServerSocketFactory(type);
 			ServerSocket ss = ssf.createServerSocket(port);
 			while (true) {
-				try{
+				try {
 
-				Socket sslsocket = ss.accept();
+					Socket sslsocket = ss.accept();
 
+					// initialize the fetching arguments
+					String certName = null;
+					int cir = 0;
 
-				// initialize the fetching arguments
-				String certName =null;
-				int cir = 0;
+					InputStream socketInputStream = sslsocket.getInputStream();
+					OutputStream socketOutputStream = sslsocket.getOutputStream();
 
-				InputStream socketInputStream = sslsocket.getInputStream();
-				OutputStream socketOutputStream = sslsocket.getOutputStream();
+					BufferedReader in = new BufferedReader(new InputStreamReader(socketInputStream));
+					BufferedWriter resp = new BufferedWriter(new OutputStreamWriter(socketOutputStream));
 
-				BufferedReader in = new BufferedReader(new InputStreamReader(socketInputStream));
-				BufferedWriter resp = new BufferedWriter(new OutputStreamWriter(socketOutputStream));
+					// Print out the bufferedinputstream
+					// System.out.println(in.readLine());
 
-				// Print out the bufferedinputstream
-				// System.out.println(in.readLine());
+					// bufferedwriter.write("hahahahaha");
 
-				// bufferedwriter.write("hahahahaha");
+					/*
+					 * String string = null; while ((string =
+					 * bufferedreader.readLine()) != null) {
+					 * System.out.println(string); System.out.flush(); }
+					 */
 
-				/*
-				 * String string = null; while ((string =
-				 * bufferedreader.readLine()) != null) {
-				 * System.out.println(string); System.out.flush(); }
-				 */
+					// Doing switch operations from incoming data stream
+					// This block of code parses through the incoming command
+					// line
+					// stream from the client
+					String ClientCom;
 
-				// Doing switch operations from incoming data stream
-				// This block of code parses through the incoming command line
-				// stream from the client
-				String ClientCom;
+					while ((ClientCom = in.readLine()) != null) {
+						System.out.println(ClientCom + "ClientCom");
+						// The circle circumference and certificate name.
+						// Commands
+						// are
+						// used to assign them values.
 
-				while ((ClientCom = in.readLine()) != null) {
-					System.out.println(ClientCom + "ClientCom");
-					// The circle circumference and certificate name. Commands
-					// are
-					// used to assign them values.
+						String flag = ClientCom.substring(0, 2);
 
+						switch (flag.charAt(1)) {
 
-					String flag = ClientCom.substring(0, 2);
+						// List all the files in directory case "-l":
+						case 'l':
+							filesys.listFiles();
 
-					switch (flag.charAt(1)) {
+							break;
 
-					// List all the files in directory case "-l":
-					case 'l':
-						filesys.listFiles();
+						// Add a new file case "-a":
+						case 'a':
 
-						break;
+							// Write the file to the server directory
+							String filename = ClientCom.substring(3);
 
-					// Add a new file case "-a":
-					case 'a':
+							// Adding file to harddisk
+							writeFile("Files/", filename, Integer.parseInt(in.readLine()), socketInputStream);
 
-						// Write the file to the server directory
-						String filename = ClientCom.substring(3);
+							// passes the filename to add method to
+							// add to the OurFileSystem object
+							filesys.add(filename);
 
+							break;
 
-						//Adding file to harddisk
-						writeFile("Files/", filename, Integer.parseInt(in.readLine()),
-								socketInputStream);
+						// Upload a certificate case "-u":
+						case 'u':
 
-						// passes the filename to add method to
-						// add to the OurFileSystem object
-						filesys.add(filename);
+							// Writing the file as a certificate and put it in
+							// the
+							// certificates folder
+							writeFile("Certificates/", ClientCom.substring(3), Integer.parseInt(in.readLine()),
+									socketInputStream);
 
+							break;
 
-						break;
+						// Vouch file with a certificate
+						case 'v':
 
-					// Upload a certificate case "-u":
-					case 'u':
+							if (filesys.vouchFile(ClientCom.substring(3), in.readLine())) {
 
-						// Writing the file as a certificate and put it in the
-						// certificates folder
-						writeFile("Certificates/", ClientCom.substring(3), Integer.parseInt(in.readLine()),
-								socketInputStream);
+								resp.write("File was vouched successfully");
+								resp.flush();
+							} else {
 
-						break;
+								resp.write(
+										"File can not be vouched because it doesn't exist in the server and/or the certificate doesn't exist in the server");
+								resp.flush();
 
-					// Vouch file with a certificate
-					case 'v':
+							}
 
-						if (filesys.vouchFile(ClientCom.substring(3), in.readLine())) {
+							break;
 
-							resp.write("File was vouched successfully");
+						case 'f':
+
+							// File fetched =
+							// filesys.fetch(ClientCom.substring(3),
+							// certName, cir);
+
+							// File fetched = new File(ClientCom.substring(3));
+							// // Get the size of the file
+							// long length = fetched.length();
+							// byte[] bytes = new byte[(int)length];
+							// resp.write(String.valueOf(length)+"\n");
+							//
+							// resp.flush();
+							// InputStream fin = new FileInputStream(fetched);
+							//
+							//
+							// fin.read(bytes);
+							// socketOutputStream.write(bytes, 0, (int)length);
+							// fin.close();
+
+							File fetched;
+
+							// If the file exists, send to client, if not send
+							// an
+							// error message
+							if ((fetched = filesys.fetch(ClientCom.substring(3), certName, cir)) != null) {
+
+								long length = fetched.length();
+								byte[] bytes = new byte[(int) length];
+
+								System.out.println(String.valueOf(length));
+								// Sending length to client
+								resp.write(String.valueOf(length) + "\n");
+
+								// Ensures everything is sent
+								resp.flush();
+
+								InputStream fin = new FileInputStream(fetched);
+								fin.read(bytes);
+								socketOutputStream.write(bytes, 0, (int) length);
+								fin.close();
+
+							} else {
+
+								resp.write("-1");
+								resp.flush();
+							}
+
+							break;
+
+						case 'n':
+							certName = ClientCom.substring(3);
+
+							break;
+
+						case 'c':
+
+							cir = Integer.parseInt(ClientCom.substring(3));
+
+							resp.write("Certificate circle length successful");
 							resp.flush();
-						} else {
+							break;
 
-							resp.write(
-									"File can not be vouched because it doesn't exist in the server and/or the certificate doesn't exist in the server");
-							resp.flush();
+						default:
+							break;
 
 						}
-
-						break;
-
-					case 'f':
-
-						// File fetched = filesys.fetch(ClientCom.substring(3),
-						// certName, cir);
-
-//						 File fetched = new File(ClientCom.substring(3));
-//						// Get the size of the file
-//						 long length = fetched.length();
-//						 byte[] bytes = new byte[(int)length];
-//						 resp.write(String.valueOf(length)+"\n");
-//
-//						 resp.flush();
-//						 InputStream fin = new FileInputStream(fetched);
-//
-//
-//						 fin.read(bytes);
-//						 socketOutputStream.write(bytes, 0, (int)length);
-//						 fin.close();
-
-
-						File fetched;
-
-						// If the file exists, send to client, if not send an
-						// error message
-						if ((fetched = filesys.fetch(ClientCom.substring(3), certName, cir)) != null) {
-
-							long length = fetched.length();
-							byte[] bytes = new byte[(int) length];
-
-							System.out.println(String.valueOf(length));
-							//Sending length to client
-							resp.write(String.valueOf(length)+ "\n");
-
-							//Ensures everything is sent
-							resp.flush();
-
-							InputStream fin = new FileInputStream(fetched);
-							fin.read(bytes);
-							socketOutputStream.write(bytes, 0, (int) length);
-							fin.close();
-
-						} else {
-
-							resp.write("-1");
-							resp.flush();
-						}
-
-						break;
-
-					case 'n':
-						cir = Integer.parseInt(ClientCom.substring(3));
-
-						break;
-
-					case 'c':
-
-						certName = ClientCom.substring(3);
-
-						resp.write("Certificate circle length successful");
-						resp.flush();
-						break;
-
-					default:
-						break;
 
 					}
 
-				}
+					// Closes data input stream
+					in.close();
 
-				// Closes data input stream
-				in.close();
+					sslsocket.close();
 
-				sslsocket.close();
-
-				}catch(Exception e){
+				} catch (Exception e) {
 					System.out.println("Error while running: " + e.getMessage());
 					e.printStackTrace();
 				}
 
 			}
 
-
 		} catch (Exception exception) {
 			System.out.println("Unable to start Server: " + exception.getMessage());
 			exception.printStackTrace();
 		}
 	}
-
-
 
 	// This method was obtained from:
 	// http://docs.oracle.com/javase/1.5.0/docs/guide/security/jsse/samples/sockets/server/ClassFileServer.java
@@ -257,8 +251,7 @@ public class Server {
 
 	// Helper function to write a file to the server and return the raw file in
 	// byte arrays
-	private static void writeFile(String type, String filename, int fileSize, InputStream inStream)
-			throws IOException {
+	private static void writeFile(String type, String filename, int fileSize, InputStream inStream) throws IOException {
 
 		// next upcoming stream should be the data file
 		// http://stackoverflow.com/questions/9520911/java-sending-and-receiving-file-byte-over-sockets
@@ -281,8 +274,6 @@ public class Server {
 
 		// Close output stream
 		output.close();
-
-
 
 	}
 
@@ -317,8 +308,6 @@ public class Server {
 		// http://stackoverflow.com/questions/4852531/find-files-in-a-folder-using-javas
 		// -f filename -c size -n name
 		public File fetch(final String fname, String certname, Integer cir) throws FileNotFoundException {
-
-
 
 			File output = null;
 
@@ -396,7 +385,7 @@ public class Server {
 
 		String fileName;
 		private ArrayList<X509Certificate> certificates;
-		private ArrayList<ArrayList<Principal>> cycleList;
+		private List<List<Principal>> cycleList;
 		private DefaultDirectedGraph<Principal, DefaultEdge> graph;
 		private ArrayList<Principal> vertices;
 		int maxCircle;
@@ -414,6 +403,10 @@ public class Server {
 		// Add certificate's issuer and subjects to the vertices arraylist and
 		// then the graph
 		public void certAdd(X509Certificate cert) {
+
+			//Adding certificate to certificates arraylist
+			certificates.add(cert);
+
 			Principal issuer = cert.getIssuerDN();
 			Principal subject = cert.getSubjectDN();
 			if (!vertices.contains(issuer)) {
@@ -456,18 +449,9 @@ public class Server {
 
 		// Find all the cycles in the graph and add it to the cyclelist
 		private void constructCycles() {
-			JohnsonSimpleCycles<Principal, DefaultEdge> johnsons = new JohnsonSimpleCycles<Principal, DefaultEdge>(
-					graph);
+			JohnsonSimpleCycles<Principal, DefaultEdge> johnsons = new JohnsonSimpleCycles<Principal, DefaultEdge>(graph);
 
-			// Changing the values of findSimpleCycles to an
-			// ArrayList<ArrayList<Principal>>
-			List<List<Principal>> johnsonsListRep = johnsons.findSimpleCycles();
-			for (int i = 0; i < johnsonsListRep.size(); i++) {
-
-				ArrayList<Principal> innerArray = new ArrayList<Principal>(johnsonsListRep.get(i));
-
-				cycleList.add(innerArray);
-			}
+			cycleList = johnsons.findSimpleCycles();
 
 			findMaxCircle();
 
@@ -478,7 +462,7 @@ public class Server {
 
 			int maxSize = 0;
 
-			for (ArrayList<Principal> cycle : cycleList) {
+			for (List<Principal> cycle : cycleList) {
 
 				if (cycle.size() > maxSize) {
 
