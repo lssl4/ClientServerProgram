@@ -113,19 +113,17 @@ public class Server {
 
 						// Vouch file with a certificate
 						case 'v':
-
-							if (filesys.vouchFile(ClientCom.substring(3), in.readLine())) {
+							try{
+								filesys.vouchFile(ClientCom.substring(3), in.readLine());
 
 								resp.write("File was vouched successfully");
 								resp.flush();
-							} else {
 
-								resp.write(
-										"File can not be vouched because it doesn't exist in the server and/or the certificate doesn't exist in the server");
+							}catch(Exception e){
+								resp.write("File can not be vouched because it doesn't exist in the server and/or the certificate doesn't exist in the server");
 								resp.flush();
 
 							}
-
 							break;
 
 						case 'f':
