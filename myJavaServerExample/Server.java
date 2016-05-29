@@ -17,8 +17,9 @@ import java.security.Principal;
 import java.util.*;
 
 //http://stilius.net/java/java_ssl.php and http://docs.oracle.com/javase/1.5.0/docs/guide/security/jsse/samples/sockets/server/ClassFileServer.java
-public class Server {
+public class Server implements Serializable {
 
+	private String serializedName = "Server.ser";
 	private OurFileSystem filesys;
 	private String type = "SSL";
 	private int port = 2323;
@@ -30,10 +31,19 @@ public class Server {
 			e.printStackTrace();
 		}
 	}
+	public Server(String servName){
+	    try{
+	    this.serilizedName = servName
+	    this.filesys = readServerFromDisk(serializedName);
+	    }catch(Exception e){
+		System.out.println("Error while Reading: " + e.getMessage());
+		e.printStackTrace();
+	    }
+	}
+
 
 	public void run() {
 		try {
-
 			ServerSocketFactory ssf = getServerSocketFactory(type);
 			ServerSocket ss = ssf.createServerSocket(port);
 			while (true) {
@@ -100,7 +110,7 @@ public class Server {
 							// passes the filename to add method to
 							// add to the OurFileSystem object
 							filesys.add(filename);
-
+							saveServerToDisk(serializedName);
 							break;
 
 						// Upload a certificate case "-u":
@@ -118,7 +128,7 @@ public class Server {
 						case 'v':
 							try{
 								filesys.vouchFile(ClientCom.substring(3), in.readLine());
-
+								saveServerToDisk(serializedName);
 								resp.write("File was vouched successfully");
 								resp.flush();
 
@@ -217,6 +227,37 @@ public class Server {
 		}
 	}
 
+	//http://www.tutorialspoint.com/java/java_serialization.htm
+	private void saveServerToDisk(String servername){
+	    try
+	    {
+		FileOutputStream fileOut = new FileOutputStream("Serialized/" + servername);
+		ObjectOutputStream serOut = new ObjectOutputStream(fileOut);
+		serOut.writeObject(this.filesys);
+		serOut.close();
+		fileOut.close();
+	    }catch(IOException i){
+		System.out.println("Unable to save Server: " + i.getMessage());
+		i.printStackTrace();
+	    }
+	}
+	private OurFileSystem readServerFromDisk(String servername){
+	    OurFileSystem files = null;
+	    try
+	    {
+		FileInputStream fileIn = new FileInputStream("Serialized/" + servername);
+		ObjectInputStream serIn = new ObjectInputStream(fileIn);
+		files = (OurFileSystem) serIn.readObject();
+		serIn.close();
+		fileIn.close();
+	    }catch(Exception i)
+	    {
+	     System.out.println("Unable to read Server: " + i.getMessage());
+             i.printStackTrace();
+	    }
+	    return files;
+	}
+
 	// This method was obtained from:
 	// http://docs.oracle.com/javase/1.5.0/docs/guide/security/jsse/samples/sockets/server/ClassFileServer.java
 	// (27 May 2016)
@@ -278,7 +319,9 @@ public class Server {
 
 	}
 
-	public class OurFileSystem implements Serializable{
+
+	public class OurFileSystem implements Serializable {
+		private static final long serialVersionUID = 3694190900322266196L;
 
 		private ArrayList<ServerFile> serverFileSystem = new ArrayList<ServerFile>();
 
@@ -386,6 +429,7 @@ public class Server {
 	}
 
 	public class ServerFile implements Serializable {
+
 
 		String fileName;
 		private ArrayList<X509Certificate> certificates;
