@@ -77,7 +77,14 @@ else:
 
     if not(options.fetchfile is None):
         sslSock.send("-f "+ options.fetchfile + "\n")
-        leng = int(sslSock.read())
+        #print("here2")
+        leng = "";
+        n = sslSock.read(1)
+        while n != "\n":
+            leng += n;
+            n = sslSock.read(1)
+        #print(str(leng))
+        leng = int(leng)
         f = sslSock.read(leng)
         while(len(f)<leng):
             f += sslSock.read(leng-len(f))
@@ -86,7 +93,7 @@ else:
     if (options.toList):
         data = "-l"
         sslSock.send(data)
-
+    #print("here")
     #sslSock.send("hi2\n")
     #msg = str(sslSock.read(24))
     #print(msg)

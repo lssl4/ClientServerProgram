@@ -172,7 +172,7 @@ public class Server {
 
 							} else {
 
-								resp.write("-1");
+								resp.write("-1\n");
 								resp.flush();
 							}
 
@@ -452,7 +452,14 @@ public class Server {
 			JohnsonSimpleCycles<Principal, DefaultEdge> johnsons = new JohnsonSimpleCycles<Principal, DefaultEdge>(graph);
 
 			cycleList = johnsons.findSimpleCycles();
+			for (List<Principal> cycle : cycleList) {
 
+				for (Principal ele : cycle) {
+
+					System.out.println(ele.getName());
+				}System.out.println("new cycle");
+
+			}
 			findMaxCircle();
 
 		}
