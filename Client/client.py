@@ -91,8 +91,21 @@ else:
         sys.stdout.write(f)
 
     if (options.toList):
-        data = "-l"
+        data = "-l\n"
         sslSock.send(data)
+        #read in number of lines
+        lines = "";
+        n = sslSock.read(1)
+        while n != "\n":
+            lines += n;
+            n = sslSock.read(1)
+        #reading file names now
+        for x in range(0,int(lines)+1):
+            m = ""
+            while m != "\n":
+                m += sslSock.read(1)
+            sys.stdout.write(m)
+
     #print("here")
     #sslSock.send("hi2\n")
     #msg = str(sslSock.read(24))

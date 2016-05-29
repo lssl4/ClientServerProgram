@@ -81,7 +81,10 @@ public class Server {
 
 						// List all the files in directory case "-l":
 						case 'l':
-							filesys.listFiles();
+
+
+							resp.write(filesys.listFiles());
+							resp.flush();
 
 							break;
 
@@ -275,7 +278,7 @@ public class Server {
 
 	}
 
-	public class OurFileSystem {
+	public class OurFileSystem implements Serializable{
 
 		private ArrayList<ServerFile> serverFileSystem = new ArrayList<ServerFile>();
 
@@ -331,6 +334,9 @@ public class Server {
 		public String listFiles() {
 			String list = "";
 
+			//number of files first
+			list += serverFileSystem.size() + "\n";
+
 			for (ServerFile f : serverFileSystem) {
 				list += f.fileName + ": " + f.maxCircle + "\n";
 
@@ -379,7 +385,7 @@ public class Server {
 
 	}
 
-	public class ServerFile implements Comparable<ServerFile> {
+	public class ServerFile implements Serializable {
 
 		String fileName;
 		private ArrayList<X509Certificate> certificates;
@@ -480,11 +486,7 @@ public class Server {
 
 		}
 
-		@Override
-		public int compareTo(ServerFile o) {
 
-			return o.fileName.compareTo(this.fileName);
-		}
 
 	}
 
