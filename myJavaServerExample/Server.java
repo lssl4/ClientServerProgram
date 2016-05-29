@@ -14,6 +14,7 @@ import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
+import javax.security.auth.x500.X500Principal;
 import java.util.*;
 
 //http://stilius.net/java/java_ssl.php and http://docs.oracle.com/javase/1.5.0/docs/guide/security/jsse/samples/sockets/server/ClassFileServer.java
@@ -442,17 +443,17 @@ public class Server implements Serializable {
 
 		String fileName;
 		private ArrayList<X509Certificate> certificates;
-		private List<List<Principal>> cycleList;
-		private DefaultDirectedGraph<Principal, DefaultEdge> graph;
-		private ArrayList<Principal> vertices;
+		private List<List<X500Principal>> cycleList;
+		private DefaultDirectedGraph<X500Principal, DefaultEdge> graph;
+		private ArrayList<X500Principal> vertices;
 		int maxCircle;
 
 		public ServerFile(String name) throws NoSuchAlgorithmException {
 
 			fileName = name;
 			certificates = new ArrayList<X509Certificate>();
-			graph = new DefaultDirectedGraph<Principal, DefaultEdge>(DefaultEdge.class);
-			vertices = new ArrayList<Principal>();
+			graph = new DefaultDirectedGraph<X500Principal, DefaultEdge>(DefaultEdge.class);
+			vertices = new ArrayList<X500Principal>();
 			maxCircle = 0;
 
 		}
@@ -464,8 +465,8 @@ public class Server implements Serializable {
 			//Adding certificate to certificates arraylist
 			certificates.add(cert);
 
-			Principal issuer = cert.getIssuerDN();
-			Principal subject = cert.getSubjectDN();
+			X500Principal issuer = cert.getIssuerX500Principal();
+			X500Principal subject = cert.getSubjectX500Principal();
 			if (!vertices.contains(issuer)) {
 				vertices.add(issuer);
 				graph.addVertex(issuer);
@@ -506,12 +507,12 @@ public class Server implements Serializable {
 
 		// Find all the cycles in the graph and add it to the cyclelist
 		private void constructCycles() {
-			JohnsonSimpleCycles<Principal, DefaultEdge> johnsons = new JohnsonSimpleCycles<Principal, DefaultEdge>(graph);
+			JohnsonSimpleCycles<X500Principal, DefaultEdge> johnsons = new JohnsonSimpleCycles<X500Principal, DefaultEdge>(graph);
 
 			cycleList = johnsons.findSimpleCycles();
-			for (List<Principal> cycle : cycleList) {
+			for (List<X500Principal> cycle : cycleList) {
 
-				for (Principal ele : cycle) {
+				for (X500Principal ele : cycle) {
 
 					System.out.println(ele.getName());
 				}System.out.println("new cycle");
@@ -526,7 +527,7 @@ public class Server implements Serializable {
 
 			int maxSize = 0;
 
-			for (List<Principal> cycle : cycleList) {
+			for (List<X500Principal> cycle : cycleList) {
 
 				if (cycle.size() > maxSize) {
 
