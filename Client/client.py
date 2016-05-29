@@ -58,8 +58,9 @@ else:
         sslSock.send(str(os.path.getsize(options.cert))+"\n")
         sslSock.sendall(f.read())
     if not(options.valid is None):
-        sslSock.send("-v " + options.valid[0] + " " + options.valid[1] + "\n")
-        sslSock.read(msgBuffer)
+        sslSock.send("-v " + options.valid[0] + "\n" + options.valid[1] + "\n")
+        msg = sslSock.read(msgBuffer)
+        print >>sys.stderr, msg
     if (options.namedCircle > 0):
         sslSock.send("-n "  + options.namedCircle + "\n")
         sslSock.read(msgBuffer)
@@ -76,7 +77,6 @@ else:
 
     if not(options.fetchfile is None):
         sslSock.send("-f "+ options.fetchfile + "\n")
-        print(sslSock.read())
         leng = int(sslSock.read())
         f = sslSock.read(leng)
         while(len(f)<leng):

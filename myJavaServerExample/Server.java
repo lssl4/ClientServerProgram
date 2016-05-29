@@ -39,6 +39,8 @@ public class Server {
 			ServerSocketFactory ssf = getServerSocketFactory(type);
 			ServerSocket ss = ssf.createServerSocket(port);
 			while (true) {
+				try{
+
 				Socket sslsocket = ss.accept();
 
 
@@ -116,7 +118,7 @@ public class Server {
 					// Vouch file with a certificate
 					case 'v':
 
-						if (!filesys.vouchFile(ClientCom.substring(3), in.readLine())) {
+						if (filesys.vouchFile(ClientCom.substring(3), in.readLine())) {
 
 							resp.write("File was vouched successfully");
 							resp.flush();
@@ -134,18 +136,21 @@ public class Server {
 
 						// File fetched = filesys.fetch(ClientCom.substring(3),
 						// certName, cir);
-						/*
-						 * File fetched = new File(ClientCom.substring(3)); //
-						 * Get the size of the file long length =
-						 * fetched.length(); byte[] bytes = new
-						 * byte[(int)length]; resp.write(String.valueOf(length)+
-						 * "\n"); resp.flush(); InputStream fin = new
-						 * FileInputStream(fetched);
-						 *
-						 *
-						 * fin.read(bytes); socketOutputStream.write(bytes, 0,
-						 * (int)length); fin.close();
-						 */
+
+//						 File fetched = new File(ClientCom.substring(3));
+//						// Get the size of the file
+//						 long length = fetched.length();
+//						 byte[] bytes = new byte[(int)length];
+//						 resp.write(String.valueOf(length)+"\n");
+//
+//						 resp.flush();
+//						 InputStream fin = new FileInputStream(fetched);
+//
+//
+//						 fin.read(bytes);
+//						 socketOutputStream.write(bytes, 0, (int)length);
+//						 fin.close();
+
 
 						File fetched;
 
@@ -156,6 +161,7 @@ public class Server {
 							long length = fetched.length();
 							byte[] bytes = new byte[(int) length];
 
+							System.out.println(String.valueOf(length));
 							//Sending length to client
 							resp.write(String.valueOf(length)+ "\n");
 
@@ -199,14 +205,22 @@ public class Server {
 				in.close();
 
 				sslsocket.close();
+
+				}catch(Exception e){
+					System.out.println("Error while running: " + e.getMessage());
+					e.printStackTrace();
+				}
+
 			}
+
 
 		} catch (Exception exception) {
 			System.out.println("Unable to start Server: " + exception.getMessage());
 			exception.printStackTrace();
 		}
-
 	}
+
+
 
 	// This method was obtained from:
 	// http://docs.oracle.com/javase/1.5.0/docs/guide/security/jsse/samples/sockets/server/ClassFileServer.java
