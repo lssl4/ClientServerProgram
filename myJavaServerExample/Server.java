@@ -98,7 +98,9 @@ public class Server implements Serializable {
 
 							for(int i = 0; i < size; i++){
 
-								resp.write(filesys.serverFileSystem.get(i).fileName +"\n");
+								ServerFile file  = filesys.serverFileSystem.get(i);
+
+								resp.write(file.fileName + "\t"+ file.maxCircle +"\n");
 								resp.flush();
 							}
 
