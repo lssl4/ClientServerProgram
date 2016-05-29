@@ -35,14 +35,14 @@ public class Server implements Serializable {
 			filesys = new OurFileSystem();
 
 	}
-	public Server(String servName) throws  IOException{
+	public Server(String servName) throws IOException {
 		this.serializedName = servName;
 
 		try{
 	    this.filesys = readServerFromDisk(serializedName);
 
 		System.out.println("Error while Reading: " );
-		}catch(ClassNotFoundException e){
+		}catch(Exception e){
 
 			System.out.println("Error loading serverFileSystem: " + e.getMessage());
 			e.printStackTrace();
