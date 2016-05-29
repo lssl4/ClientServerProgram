@@ -492,7 +492,10 @@ public class Server implements Serializable {
 							return true;
 						} else {
 							for (int j = 0; j < innerArraySize; j++) {
-								if (cycleList.get(i).get(j).getName().equals(certname)) {
+
+								String[] splittedName = cycleList.get(i).get(j).getName().split(",");
+
+								if (splittedName[1].substring(3).equals(certname)) {
 									return true;
 								}
 							}
