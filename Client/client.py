@@ -49,7 +49,6 @@ else:
     s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     sslSock = ctx.wrap_socket(s)
     sslSock.connect((hostInfo[0],int(hostInfo[1])))
-    #sslSock.send("hi\n")
 
     if not(options.cert is None):
         f = open(options.cert,'r')
@@ -89,11 +88,14 @@ else:
             leng += n;
             n = sslSock.read(1)
         #print(str(leng))
-        leng = int(leng)
-        f = sslSock.read(leng)
-        while(len(f)<leng):
-            f += sslSock.read(leng-len(f))
-        sys.stdout.write(f)
+        leng = int(leng)       
+        if(leng >=0):
+            f = sslSock.read(leng)
+            while(len(f)<leng):
+                f += sslSock.read(leng-len(f))
+            sys.stdout.write(f)
+        else:
+            print >>sys.stderr, "File Not Found"
 
     if (options.toList):
         data = "-l\n"
@@ -106,9 +108,11 @@ else:
             n = sslSock.read(1)
         #reading file names now
         print("Files Found = " + lines)
-        for x in range(0,int(lines)+1):
+        for x in range(0,int(lines)):
             m = ""
-            while m != "\n":
-                m += sslSock.read(1)
+            c = sslSock.read(1)
+            while c != "\n":
+                m += c
+                c = sslSock.read(1)
             print(m)
     sslSock.close()
