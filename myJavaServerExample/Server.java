@@ -1,3 +1,8 @@
+/*
+* Name: Tzi Siong Leong (20753794), Alexander Miller (2151714), Trae Shaw (21521443)
+* Date: May 28 2016
+*/
+
 
 import javax.net.ServerSocketFactory;
 import javax.net.ssl.*;
@@ -17,7 +22,7 @@ import java.security.Principal;
 import javax.security.auth.x500.X500Principal;
 import java.util.*;
 
-//http://stilius.net/java/java_ssl.php and http://docs.oracle.com/javase/1.5.0/docs/guide/security/jsse/samples/sockets/server/ClassFileServer.java
+//From: http://stilius.net/java/java_ssl.php and http://docs.oracle.com/javase/1.5.0/docs/guide/security/jsse/samples/sockets/server/ClassFileServer.java (25052016)
 public class Server implements Serializable {
 
 	private String serializedName = "Server.ser";
@@ -70,29 +75,11 @@ public class Server implements Serializable {
 					BufferedReader in = new BufferedReader(new InputStreamReader(socketInputStream));
 					BufferedWriter resp = new BufferedWriter(new OutputStreamWriter(socketOutputStream));
 
-					// Print out the bufferedinputstream
-					// System.out.println(in.readLine());
-
-					// bufferedwriter.write("hahahahaha");
-
-					/*
-					 * String string = null; while ((string =
-					 * bufferedreader.readLine()) != null) {
-					 * System.out.println(string); System.out.flush(); }
-					 */
-
-					// Doing switch operations from incoming data stream
-					// This block of code parses through the incoming command
-					// line
-					// stream from the client
 					String ClientCom;
 
 					while ((ClientCom = in.readLine()) != null) {
 						System.out.println(ClientCom + "ClientCom");
-						// The circle circumference and certificate name.
-						// Commands
-						// are
-						// used to assign them values.
+
 
 						String flag = ClientCom.substring(0, 2);
 
@@ -118,27 +105,42 @@ public class Server implements Serializable {
 
 						// Add a new file case "-a":
 						case 'a':
+							try{
 
-							// Write the file to the server directory
-							String filename = ClientCom.substring(3);
+								// Write the file to the server directory
+								String filename = ClientCom.substring(3);
 
-							// Adding file to harddisk
-							writeFile("Files/", filename, Integer.parseInt(in.readLine()), socketInputStream);
+								// Adding file to harddisk
+								writeFile("Files/", filename, Integer.parseInt(in.readLine()), socketInputStream);
 
-							// passes the filename to add method to
-							// add to the OurFileSystem object
-							filesys.add(filename);
-							saveServerToDisk(serializedName);
+								// passes the filename to add method to
+								// add to the OurFileSystem object
+								filesys.add(filename);
+								saveServerToDisk(serializedName);
+
+								resp.write("File was uploaded successfully");
+								resp.flush();
+
+							}catch(Exception e){
+								resp.write("File was not uploaded successfully");
+								resp.flush();
+
+							}
 							break;
-
 						// Upload a certificate case "-u":
 						case 'u':
 
-							// Writing the file as a certificate and put it in
-							// the
-							// certificates folder
-							writeFile("Certificates/", ClientCom.substring(3), Integer.parseInt(in.readLine()),
-									socketInputStream);
+							try{
+							// Writing the file as a certificate and put it in the certificates folder
+							writeFile("Certificates/", ClientCom.substring(3), Integer.parseInt(in.readLine()), socketInputStream);
+								resp.write("Certificate was uploaded successfully");
+								resp.flush();
+							}catch(Exception e){
+
+								resp.write("Certificate was not uploaded successfully");
+								resp.flush();
+							}
+
 
 							break;
 
@@ -159,29 +161,11 @@ public class Server implements Serializable {
 
 						case 'f':
 
-							// File fetched =
-							// filesys.fetch(ClientCom.substring(3),
-							// certName, cir);
 
-							// File fetched = new File(ClientCom.substring(3));
-							// // Get the size of the file
-							// long length = fetched.length();
-							// byte[] bytes = new byte[(int)length];
-							// resp.write(String.valueOf(length)+"\n");
-							//
-							// resp.flush();
-							// InputStream fin = new FileInputStream(fetched);
-							//
-							//
-							// fin.read(bytes);
-							// socketOutputStream.write(bytes, 0, (int)length);
-							// fin.close();
 
 							File fetched;
 
-							// If the file exists, send to client, if not send
-							// an
-							// error message
+							// If the file exists, send to client, if not send an error message
 							if ((fetched = filesys.fetch(ClientCom.substring(3), certName, cir)) != null) {
 
 								long length = fetched.length();
@@ -247,7 +231,7 @@ public class Server implements Serializable {
 		}
 	}
 
-	//http://www.tutorialspoint.com/java/java_serialization.htm
+	//From: http://www.tutorialspoint.com/java/java_serialization.htm (24052016)
 	private void saveServerToDisk(String servername){
 	    try
 	    {
@@ -273,9 +257,12 @@ public class Server implements Serializable {
 	    return files;
 	}
 
-	// This method was obtained from:
-	// http://docs.oracle.com/javase/1.5.0/docs/guide/security/jsse/samples/sockets/server/ClassFileServer.java
-	// (27 May 2016)
+
+
+
+
+
+	// From: http://docs.oracle.com/javase/1.5.0/docs/guide/security/jsse/samples/sockets/server/ClassFileServer.java (27 May 2016)
 	private static ServerSocketFactory getServerSocketFactory(String type) {
 		if (type.equals(type)) {
 			SSLServerSocketFactory ssf = null;
@@ -308,29 +295,30 @@ public class Server implements Serializable {
 
 	// Helper function to write a file to the server and return the raw file in
 	// byte arrays
-	private static void writeFile(String type, String filename, int fileSize, InputStream inStream) throws IOException {
+	private static boolean writeFile(String type, String filename, int fileSize, InputStream inStream) throws IOException {
 
-		// next upcoming stream should be the data file
-		// http://stackoverflow.com/questions/9520911/java-sending-and-receiving-file-byte-over-sockets
-		// (27052016)
+		// From: http://stackoverflow.com/questions/9520911/java-sending-and-receiving-file-byte-over-sockets (27052016)
+
+		boolean status =false;
 
 		OutputStream output = new FileOutputStream(type + filename);
 
-		// Make a byte array to be the length of incoming data stream to
-		// populate it with the raw data file
+		// Make a byte array to be the length of incoming data stream to populate it with the raw data file
 		byte[] fileBytes = new byte[fileSize];
 
-		// Obtaining the number of bytes that is read and use that to write the
-		// file using the fileBytes
+		// Obtaining the number of bytes that is read and use that to write the file using the fileBytes
 		int count = inStream.read(fileBytes);
 		if (count != fileSize) {
 			System.out.println("error reading file");
 
+		}else{
+			output.write(fileBytes, 0, count);
+			status = true;
 		}
-		output.write(fileBytes, 0, count);
-
 		// Close output stream
 		output.close();
+
+		return status;
 
 	}
 
@@ -364,8 +352,6 @@ public class Server implements Serializable {
 			serverFileSystem.add(newFile);
 		}
 
-		// http://stackoverflow.com/questions/4852531/find-files-in-a-folder-using-javas
-		// -f filename -c size -n name
 		public File fetch(final String fname, String certname, Integer cir) throws FileNotFoundException {
 
 			File output = null;
@@ -406,29 +392,22 @@ public class Server implements Serializable {
 		public boolean vouchFile(String filename, final String certname)
 				throws FileNotFoundException, CertificateException {
 
-			// For each serverfile in the serverfile system, find the file with
-			// the same name as filename
+			// For each serverfile in the serverfile system, find the file with the same name as filename
 			boolean status = false;
 			for (ServerFile f : serverFileSystem) {
 
-				// if the ServerFile matches the name, add the certificate to
-				// the arraylist
+				// if the ServerFile matches the name, add the certificate to the arraylist
 				if (f.fileName.equals(filename)) {
 
-					// Find the certain certificate in the certificate
-					// directories
-					// Once the certificate has been found, append to the
+					// Find the certain certificate in the certificate directories. Once the certificate has been found, append to the
 					// ServerFile certificate arraylist
-					// From:
-					// https://docs.oracle.com/javase/7/docs/api/java/security/cert/X509Certificate.htmls
-					// (27052016)
+					// From: https://docs.oracle.com/javase/7/docs/api/java/security/cert/X509Certificate.htmls (27052016)
 
 					FileInputStream inputStream = new FileInputStream("Certificates/" + certname);
 
 					CertificateFactory certFac = CertificateFactory.getInstance("X.509");
 
-					// Once the stream has been converted to a certificate,
-					// add it to the ServerFile certificate array
+					// Once the stream has been converted to a certificate, add it to the ServerFile certificate array
 					X509Certificate genCert = (X509Certificate) certFac.generateCertificate(inputStream);
 					f.certAdd(genCert);
 
@@ -443,6 +422,7 @@ public class Server implements Serializable {
 
 	}
 
+	//From: http://jgrapht.org/javadoc/ (26052016)
 	public class ServerFile implements Serializable, Comparable<ServerFile>{
 
 
@@ -463,8 +443,8 @@ public class Server implements Serializable {
 
 		}
 
-		// Add certificate's issuer and subjects to the vertices arraylist and
-		// then the graph
+		// Add certificate's issuer and subjects to the vertices arraylist and then the graph
+    // From: https://github.com/jgrapht/jgrapht/wiki/DirectedGraphDemo (26052016)
 		public void certAdd(X509Certificate cert) {
 
 			//Adding certificate to certificates arraylist
@@ -553,9 +533,6 @@ public class Server implements Serializable {
 
 			return o.fileName.compareTo(this.fileName);
 		}
-
-
-
 
 	}
 
