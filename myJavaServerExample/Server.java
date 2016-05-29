@@ -169,7 +169,7 @@ public class Server {
 
 						} else {
 
-							resp.write("File can not be fetched because it doesn't exist in the server");
+							resp.write("-1");
 							resp.flush();
 						}
 
@@ -316,7 +316,7 @@ public class Server {
 					// determine if the file can be returned to client, if not
 					// return null
 					if (f.isValid(cir, certname)) {
-
+						System.out.println("valid");
 						output = new File("Files/" + fname);
 					}
 
