@@ -66,22 +66,38 @@ else:
         sslSock.send("-u " + options.cert + "\n")
         sslSock.send(str(os.path.getsize(options.cert))+"\n")
         sslSock.sendall(f.read())
-        msg = sslSock.read(msgBuffer)
+        msg = "";
+        n = sslSock.read(1)
+        while n != "\n":
+            msg += n;
+            n = sslSock.read(1)
         print >>sys.stderr, msg
 
     if not(options.valid is None):
         sslSock.send("-v " + options.valid[0] + "\n" + options.valid[1] + "\n")
-        msg = sslSock.read(msgBuffer)
+        msg = "";
+        n = sslSock.read(1)
+        while n != "\n":
+            msg += n;
+            n = sslSock.read(1)
         print >>sys.stderr, msg
 
     if (options.namedCircle > 0):
         sslSock.send("-n "  + options.namedCircle + "\n")
-        msg = sslSock.read(msgBuffer)
+        msg = "";
+        n = sslSock.read(1)
+        while n != "\n":
+            msg += n;
+            n = sslSock.read(1)
         print >>sys.stderr, msg
 
     if (options.circle > 0):
         sslSock.send("-c " + str(options.circle) + "\n")
-        msg = sslSock.read(msgBuffer)
+        msg = "";
+        n = sslSock.read(1)
+        while n != "\n":
+            msg += n;
+            n = sslSock.read(1)
         print >>sys.stderr, msg
 
     if not(options.addfilename is None):
@@ -89,7 +105,11 @@ else:
         sslSock.send("-a " + options.addfilename+"\n")
         sslSock.send(str(os.path.getsize(options.addfilename))+"\n")
         sslSock.sendall(f.read())
-        msg = sslSock.read(msgBuffer)
+        msg = "";
+        n = sslSock.read(1)
+        while n != "\n":
+            msg += n;
+            n = sslSock.read(1)
         print >>sys.stderr, msg
 
     if not(options.fetchfile is None):

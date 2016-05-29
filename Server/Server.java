@@ -39,9 +39,9 @@ public class Server implements Serializable {
 		this.serializedName = servName;
 
 		try{
-	    this.filesys = readServerFromDisk(serializedName);
+	   		this.filesys = readServerFromDisk(serializedName);
 
-		System.out.println("Error while Reading: " );
+
 		}catch(Exception e){
 
 			System.out.println("Error loading serverFileSystem: " + e.getMessage());
@@ -78,7 +78,7 @@ public class Server implements Serializable {
 					String ClientCom;
 
 					while ((ClientCom = in.readLine()) != null) {
-						System.out.println(ClientCom + "ClientCom");
+						System.out.println(ClientCom);
 
 
 						String flag = ClientCom.substring(0, 2);
@@ -118,11 +118,11 @@ public class Server implements Serializable {
 								filesys.add(filename);
 								saveServerToDisk(serializedName);
 
-								resp.write("File was uploaded successfully");
+								resp.write("File was uploaded successfully\n");
 								resp.flush();
 
 							}catch(Exception e){
-								resp.write("File was not uploaded successfully");
+								resp.write("File was not uploaded successfully\n");
 								resp.flush();
 
 							}
@@ -133,11 +133,11 @@ public class Server implements Serializable {
 							try{
 							// Writing the file as a certificate and put it in the certificates folder
 							writeFile("Certificates/", ClientCom.substring(3), Integer.parseInt(in.readLine()), socketInputStream);
-								resp.write("Certificate was uploaded successfully");
+								resp.write("Certificate was uploaded successfully\n");
 								resp.flush();
 							}catch(Exception e){
 
-								resp.write("Certificate was not uploaded successfully");
+								resp.write("Certificate was not uploaded successfully\n");
 								resp.flush();
 							}
 
@@ -149,11 +149,11 @@ public class Server implements Serializable {
 							try{
 								filesys.vouchFile(ClientCom.substring(3), in.readLine());
 								saveServerToDisk(serializedName);
-								resp.write("File was vouched successfully");
+								resp.write("File was vouched successfully\n");
 								resp.flush();
 
 							}catch(Exception e){
-								resp.write("File can not be vouched because it doesn't exist in the server and/or the certificate doesn't exist in the server");
+								resp.write("File can not be vouched because it doesn't exist in the server and/or the certificate doesn't exist in the server\n");
 								resp.flush();
 
 							}
@@ -171,7 +171,7 @@ public class Server implements Serializable {
 								long length = fetched.length();
 								byte[] bytes = new byte[(int) length];
 
-								System.out.println(String.valueOf(length));
+								//System.out.println(String.valueOf(length));
 								// Sending length to client
 								resp.write(String.valueOf(length) + "\n");
 
@@ -194,7 +194,7 @@ public class Server implements Serializable {
 						case 'n':
 							certName = ClientCom.substring(3);
 
-							resp.write("Name received");
+							resp.write("Name received\n");
 							resp.flush();
 							break;
 
@@ -202,7 +202,7 @@ public class Server implements Serializable {
 
 							cir = Integer.parseInt(ClientCom.substring(3));
 
-							resp.write("Certificate circle length received");
+							resp.write("Certificate circle length received\n");
 							resp.flush();
 							break;
 
@@ -295,11 +295,9 @@ public class Server implements Serializable {
 
 	// Helper function to write a file to the server and return the raw file in
 	// byte arrays
-	private static boolean writeFile(String type, String filename, int fileSize, InputStream inStream) throws IOException {
+	private static void writeFile(String type, String filename, int fileSize, InputStream inStream) throws IOException {
 
 		// From: http://stackoverflow.com/questions/9520911/java-sending-and-receiving-file-byte-over-sockets (27052016)
-
-		boolean status =false;
 
 		OutputStream output = new FileOutputStream(type + filename);
 
@@ -313,12 +311,9 @@ public class Server implements Serializable {
 
 		}else{
 			output.write(fileBytes, 0, count);
-			status = true;
 		}
 		// Close output stream
 		output.close();
-
-		return status;
 
 	}
 
@@ -364,7 +359,7 @@ public class Server implements Serializable {
 					// determine if the file can be returned to client, if not
 					// return null
 					if (f.isValid(cir, certname)) {
-						System.out.println("valid");
+						//System.out.println("valid");
 						output = new File("Files/" + fname);
 					}
 
@@ -498,6 +493,8 @@ public class Server implements Serializable {
 			JohnsonSimpleCycles<X500Principal, DefaultEdge> johnsons = new JohnsonSimpleCycles<X500Principal, DefaultEdge>(graph);
 
 			cycleList = johnsons.findSimpleCycles();
+/*
+	prints cycles on vouch
 			for (List<X500Principal> cycle : cycleList) {
 
 				for (X500Principal ele : cycle) {
@@ -506,6 +503,7 @@ public class Server implements Serializable {
 				}System.out.println("new cycle");
 
 			}
+*/
 			findMaxCircle();
 
 		}
