@@ -1,3 +1,8 @@
+'''
+Alexander Miller (21512714)
+Tzi Siong Leong (20753794)
+Trae Shaw (21521443)
+'''
 import socket
 import ssl
 import hashlib
@@ -43,6 +48,7 @@ elif (options.hostname is None):
     print("hostname required")
     exit
 else:
+    #create a SSL Socket
     hostInfo = options.hostname.split(':')
     ctx = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH,cafile="serv.pem")
     ctx.check_hostname = False
@@ -50,12 +56,16 @@ else:
     sslSock = ctx.wrap_socket(s)
     sslSock.connect((hostInfo[0],int(hostInfo[1])))
 
+    #deal with options selected
+    #Options print if option was successful on server end to stdout
     if not(options.cert is None):
         f = open(options.cert,'r')
         print(str(os.path.getsize(options.cert)))
         sslSock.send("-u " + options.cert + "\n")
         sslSock.send(str(os.path.getsize(options.cert))+"\n")
         sslSock.sendall(f.read())
+        msg = sslSock.read(msgBuffer)
+        print >>sys.stderr, msg
         
     if not(options.valid is None):
         sslSock.send("-v " + options.valid[0] + "\n" + options.valid[1] + "\n")
@@ -74,20 +84,20 @@ else:
         
     if not(options.addfilename is None):
         f = open(options.addfilename,'r')
-        #print(str(os.path.getsize(options.addfilename)))
-        sslSock.send("-a " + options.addfilename+"\n")
+        path, file = os.path.split(options.fetchfile)
+        sslSock.send("-a " + file+"\n")
         sslSock.send(str(os.path.getsize(options.addfilename))+"\n")
         sslSock.sendall(f.read())
+        msg = sslSock.read(msgBuffer)
+        print >>sys.stderr, msg
 
     if not(options.fetchfile is None):
         sslSock.send("-f "+ options.fetchfile + "\n")
-        #print("here2")
         leng = "";
         n = sslSock.read(1)
         while n != "\n":
             leng += n;
             n = sslSock.read(1)
-        #print(str(leng))
         leng = int(leng)       
         if(leng >=0):
             f = sslSock.read(leng)
