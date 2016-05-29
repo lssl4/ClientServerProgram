@@ -11,6 +11,8 @@ import os
 import sys
 #https://carlo-hamalainen.net/blog/2013/1/24/python-ssl-socket-echo-test-with-self-signed-certificate
 #http://stackoverflow.com/questions/17695297/importing-the-private-key-public-certificate-pair-in-the-java-keystore
+#https://docs.python.org/3/library/ssl.html
+#https://docs.python.org/3/library/optparse.html
 usage = "usage: %prog [options] arg1 arg2"
 msgBuffer = 1024
 parser = OptionParser(usage = usage,add_help_option=False)
